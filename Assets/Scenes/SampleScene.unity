@@ -387,6 +387,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ed300473ecd7e0469f9bcdc68ebccd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mergeShader: {fileID: 4800000, guid: cb90306d6b675f64da44b6c8a7c3240e, type: 3}
   textureRegistry:
     mergeSets:
     - setID: TestSet

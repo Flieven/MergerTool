@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 [System.Serializable]
 public struct Texture2DArrays
@@ -12,7 +13,7 @@ public struct Texture2DArrays
 [System.Serializable]
 public struct Texture2DStruct
 {
-    [SerializeField] private string setID;
+    [SerializeField] internal string setID;
     [SerializeField] internal GameObject[] prefabs;
     public Texture2DArrays diffuse;
 }
@@ -31,9 +32,10 @@ public class Texture2DRegistry
 
             //Extract textures to their associated texture2D arrays
             ExtractTextures(mergeSets[i]);
-            
+
             //Make the now extracted textures into a Texture2DArray
-            MakeTexture2DArray(mergeSets[i].diffuse);
+            Debug.Log("Merge Set: " + i);
+            MakeTexture2DArray(mergeSets[i]);
         }
     }
 
@@ -54,20 +56,24 @@ public class Texture2DRegistry
         }
     }
 
-    void MakeTexture2DArray(Texture2DArrays currentMap)
+    void MakeTexture2DArray(Texture2DStruct currentStruct)
     {
-        currentMap.texture2DArray = new Texture2DArray(1024, 1024, currentMap.array.Length, TextureFormat.ARGB32, false);
-        
-        for (int i = 0; i < currentMap.array.Length; i++)
-        {
-            //TODO: Figure out why this is such a strange size? It's coming out at 262144 which is not 1024*1024
+        currentStruct.diffuse.texture2DArray = new Texture2DArray(512, 512, currentStruct.diffuse.array.Length, TextureFormat.ARGB32, false);
 
-            Color[] newColors = currentMap.array[i].GetPixels(0);
-            Debug.Log("Size " + i + " : " + newColors.Length);
-            currentMap.texture2DArray.SetPixels(newColors, i, 0);
+        for (int i = 0; i < currentStruct.diffuse.array.Length; i++)
+        {
+            //TODO: Currently only works with sizes = or > than the given (as unity can size things down but not up to match on import). Figure out if can use smaller size as well, or if that needs special functionality.
+
+            Color[] newColors = currentStruct.diffuse.array[i].GetPixels(0);
+            Debug.Log("Texture2DArray set at " + i + " with size: " + newColors.Length + "\nWants: " + (512 * 512));
+            currentStruct.diffuse.texture2DArray.SetPixels(newColors, i, 0);
         }
 
-        currentMap.texture2DArray.Apply();
+        currentStruct.diffuse.texture2DArray.Apply();
+        AssetDatabase.CreateAsset(currentStruct.diffuse.texture2DArray, "Assets/Code/TextureRegistry/TextureArrays/" + currentStruct.setID + ".tarr");
 
+
+        if (null == currentStruct.diffuse.texture2DArray)
+        { throw new System.Exception("ERROR: Something went wrong, no Texture2DArray created for " + currentStruct.setID); }
     }
 }
