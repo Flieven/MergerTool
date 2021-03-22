@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public struct SpawnSets
+{
+    public GameObject objectToSpawn;
+    public int numObjectsToSpawn;
+}
+
 [RequireComponent(typeof(BoxCollider))]
 public class Testing_Spawner : MonoBehaviour
 {
-
-    [SerializeField] private int numObjectsToSpawn = 10;
-    [SerializeField] private GameObject[] objectsArray = null;
+    [SerializeField] private SpawnSets[] spawnArray = null;
 
     private BoxCollider boundingBox = null;
 
@@ -16,18 +21,19 @@ public class Testing_Spawner : MonoBehaviour
     {
         boundingBox = GetComponent<BoxCollider>();
 
-        for (int i = 0; i < numObjectsToSpawn; i++)
+        for (int i = 0; i < spawnArray.Length; i++)
         {
-            GameObject newRandomObj = objectsArray[Random.Range(0, objectsArray.Length)];
+            for (int ii = 0; ii < spawnArray[i].numObjectsToSpawn; ii++)
+            {
+                GameObject newRandomObj = spawnArray[i].objectToSpawn;
 
-            Instantiate(newRandomObj,
-                new Vector3(Random.Range(boundingBox.bounds.min.x, boundingBox.bounds.max.x),
-                Random.Range(boundingBox.bounds.min.y, boundingBox.bounds.max.y),
-                Random.Range(boundingBox.bounds.min.z, boundingBox.bounds.max.z)),
-                Random.rotation);
-
+                Instantiate(newRandomObj,
+                    new Vector3(Random.Range(boundingBox.bounds.min.x, boundingBox.bounds.max.x),
+                    Random.Range(boundingBox.bounds.min.y, boundingBox.bounds.max.y),
+                    Random.Range(boundingBox.bounds.min.z, boundingBox.bounds.max.z)),
+                    Random.rotation);
+            }
         }
-
     }
 
 }
