@@ -392,13 +392,17 @@ MonoBehaviour:
     mergeSets:
     - setID: TestSet
       prefabs:
-      - {fileID: 1087232998764721991, guid: 329362990c851d845872da015db786a5, type: 3}
-      - {fileID: 2256349168775237284, guid: 9ac555ec78a772a48abd902166683c1f, type: 3}
       - {fileID: 2873500436656626182, guid: 99b82556e0eaf674abeff9dd61c26d75, type: 3}
+      - {fileID: 2256349168775237284, guid: 9ac555ec78a772a48abd902166683c1f, type: 3}
+      - {fileID: 1087232998764721991, guid: 329362990c851d845872da015db786a5, type: 3}
       diffuse:
         array: []
-        texture2DArray: {fileID: 0}
+      normal:
+        array: []
+<<<<<<< HEAD
   materialArray: []
+=======
+>>>>>>> parent of 759b0e0 (Mesh Merging 0.1)
 --- !u!4 &1382762963
 Transform:
   m_ObjectHideFlags: 0
