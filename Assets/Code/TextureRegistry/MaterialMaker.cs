@@ -30,7 +30,7 @@ public class MaterialMaker : MonoBehaviour
                 CreateCustomMaterials(packet[i]);
             }
        }
-       else { throw new System.Exception("ERROR: No TextureRegistry"); }
+       else { throw new System.Exception("!!! ERROR: No TextureRegistry !!!"); }
     }
 
     //void ClearDirectory()
@@ -48,7 +48,7 @@ public class MaterialMaker : MonoBehaviour
         ApplyTextureData(newMat, packet);
         if (!materialDictionary.ContainsKey(packet.ID)) 
         {
-            Debug.Log("===== NEW MATERIAL '" + newMat.name + "' REGISTERED TO MATERIAL DICTIONARY =====");
+            Debug.Log("===== New Material '" + newMat.name + "' Registered To Material Dictionary =====");
             materialDictionary.Add(packet.ID, newMat); 
         }
     }
@@ -67,7 +67,7 @@ public class MaterialMaker : MonoBehaviour
     public Material getMaterial(string ID)
     {
         if(materialDictionary.ContainsKey(ID)) { return materialDictionary[ID]; }
-        else { throw new System.Exception("NO MATERIAL IN DICTIONARY FOUND WITH ID: '" + ID + "'"); }
+        else { throw new System.Exception("!!! ERROR: No Material In Dictionary Found With ID: '" + ID + "' !!!"); }
     }
 
 }

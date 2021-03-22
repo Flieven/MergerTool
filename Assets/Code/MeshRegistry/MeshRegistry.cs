@@ -4,4 +4,8 @@ using UnityEngine;
 
 public class MeshRegistry : MonoBehaviour
 {
+    public void MergeToRoot(GameObject obj)
+    {
+
+    }
 }

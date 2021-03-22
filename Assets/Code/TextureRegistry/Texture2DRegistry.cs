@@ -43,14 +43,14 @@ public class Texture2DRegistry : MonoBehaviour
                 Material currentMat = packet.prefabs[i].GetComponent<Renderer>().sharedMaterial;
 
                 if(null != currentMat.mainTexture) { packet.textureRegistry.diffuse.array[i] = currentMat.mainTexture as Texture2D; }
-                else { Debug.LogWarning(currentMat.name + " Does not contain a mainTexture"); }
+                else { Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a mainTexture >>>"); }
                 
                 if (null != currentMat.GetTexture("_BumpMap")) { packet.textureRegistry.normal.array[i] = currentMat.GetTexture("_BumpMap") as Texture2D; }
-                else { Debug.LogWarning(currentMat.name + " Does not contain a BumpMap"); }
+                else { Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a BumpMap >>>"); }
 
             }
             
-            else { throw new System.Exception("ERROR: No Renderer component found on prefab object: " + packet.prefabs[i].name); }
+            else { throw new System.Exception("!!! ERROR: No Renderer component found on prefab object: '" + packet.prefabs[i].name + "' !!!"); }
         }
     }
 
