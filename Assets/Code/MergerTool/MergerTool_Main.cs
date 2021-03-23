@@ -6,6 +6,7 @@ using UnityEngine;
 public class DataPacket
 {
     public string ID;
+    public float maximumDistanceToRoot = 10.0f; // Make this be per Prefab instead!
     public GameObject[] prefabs;
     public Texture2DStruct textureRegistry;
 }
@@ -38,7 +39,7 @@ public class MergerTool_Main : MonoBehaviour
                 {
                     dataSets[i].prefabs[ii].AddComponent<MergerTool_Component>();
                 }
-                dataSets[i].prefabs[ii].GetComponent<MergerTool_Component>().ConstructComponent(matMaker, meshRegistry, dataSets[i].ID, ii);
+                dataSets[i].prefabs[ii].GetComponent<MergerTool_Component>().ConstructComponent(matMaker, meshRegistry, dataSets[i].ID, ii, dataSets[i].maximumDistanceToRoot);
             }
         }
     }

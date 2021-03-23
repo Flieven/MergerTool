@@ -155,6 +155,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dataSets:
   - ID: MergeSet
+    maximumDistanceToRoot: 10
     prefabs:
     - {fileID: 1087232998764721991, guid: 329362990c851d845872da015db786a5, type: 3}
     - {fileID: 2256349168775237284, guid: 9ac555ec78a772a48abd902166683c1f, type: 3}
@@ -179,7 +180,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fb3520158d60794783b2e7d1acf1f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minimumDistanceToRoot: 10
 --- !u!114 &437118188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -249,7 +249,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f9ec23e465da1643a4aa5faa8bbb7bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  randomizedSpawn: 1
+  randomizedSpawn: 0
   spawnArray:
   - objectToSpawn: {fileID: 1087232998764721991, guid: 329362990c851d845872da015db786a5,
       type: 3}

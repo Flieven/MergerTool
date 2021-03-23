@@ -4,11 +4,8 @@ using UnityEngine;
 
 public class MeshRegistry : MonoBehaviour
 {
-    [SerializeField] private float minimumDistanceToRoot = 10.0f;
-
-
     Dictionary<string, Dictionary<int, KDTree>> posDictionary = new Dictionary<string, Dictionary<int, KDTree>>();
-    public void MergeToRoot(GameObject obj, string ID, int prefabIndex)
+    public void MergeToRoot(GameObject obj, string ID, int prefabIndex, float maxDistance)
     {
         if(!posDictionary.ContainsKey(ID))
         {
@@ -31,7 +28,7 @@ public class MeshRegistry : MonoBehaviour
 
         Node nearestFound = posDictionary[ID][prefabIndex].Nearest(posDictionary[ID][prefabIndex].getRoot, obj.transform.position, null, 0);
 
-        if(Vector3.Distance(nearestFound.pos, obj.transform.position) <= minimumDistanceToRoot)
+        if(Vector3.Distance(nearestFound.pos, obj.transform.position) <= maxDistance)
         { 
             //Debug.Log("===== Found Nearest: '" + nearestFound.obj.name + "' Within minimumDistance To '" + obj.name + "' =====");
             

@@ -6,6 +6,7 @@ public class MergerTool_Component : MonoBehaviour
 {
 
     [SerializeField] public string ID;
+    [SerializeField] public float maximumDistanceToRoot;
     [SerializeField] public Material customMaterial;
     [SerializeField] public int prefabIndex;
 
@@ -20,13 +21,14 @@ public class MergerTool_Component : MonoBehaviour
         if( null != meshRegistry)
         {
             //Debug.Log("Checking Nearest In: " + gameObject.name);
-            meshRegistry.MergeToRoot(gameObject, ID, prefabIndex);
+            meshRegistry.MergeToRoot(gameObject, ID, prefabIndex, maximumDistanceToRoot);
         }
     }
 
-    public void ConstructComponent(MaterialMaker matMaker, MeshRegistry meshReg, string setID, int materailIndex)
+    public void ConstructComponent(MaterialMaker matMaker, MeshRegistry meshReg, string setID, int materailIndex, float maxDist)
     {
         ID = setID;
+        maximumDistanceToRoot = maxDist;
         prefabIndex = materailIndex;
         materialMaker = matMaker;
         meshRegistry = meshReg;
