@@ -33,9 +33,11 @@ public class MeshRegistry : MonoBehaviour
 
         if(Vector3.Distance(nearestFound.pos, obj.transform.position) <= minimumDistanceToRoot)
         { 
-            Debug.Log("===== Found Nearest: '" + nearestFound.obj.name + "' Within minimumDistance To '" + obj.name + "' =====");
-            // PARENT THE OBJECTS HERE
+            //Debug.Log("===== Found Nearest: '" + nearestFound.obj.name + "' Within minimumDistance To '" + obj.name + "' =====");
+            
+            // PARENT/MERGE THE OBJECTS HERE
             obj.transform.SetParent(nearestFound.obj.transform);
+            nearestFound.obj.GetComponent<MergerTool_Component>().MergeMesh();
         }
         else 
         {

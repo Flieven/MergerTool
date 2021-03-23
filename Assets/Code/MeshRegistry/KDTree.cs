@@ -118,6 +118,9 @@ public class KDTree
 
         currentBest = Nearest(goodSide, goal, currentBest, depth++);
 
+        //Having this will check the entire Tree BUT it will be slower because of it!
+        currentBest = Nearest(badSide, goal, currentBest, depth++);
+
         return currentBest;
 
     }

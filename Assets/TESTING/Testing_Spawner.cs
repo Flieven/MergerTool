@@ -12,6 +12,8 @@ public struct SpawnSets
 [RequireComponent(typeof(BoxCollider))]
 public class Testing_Spawner : MonoBehaviour
 {
+
+    [SerializeField] private bool randomizedSpawn = true;
     [SerializeField] private SpawnSets[] spawnArray = null;
 
     private BoxCollider boundingBox = null;
@@ -27,11 +29,22 @@ public class Testing_Spawner : MonoBehaviour
             {
                 GameObject newRandomObj = spawnArray[i].objectToSpawn;
 
-                GameObject newObj = Instantiate(newRandomObj,
-                    new Vector3(Random.Range(boundingBox.bounds.min.x, boundingBox.bounds.max.x),
-                    Random.Range(boundingBox.bounds.min.y, boundingBox.bounds.max.y),
-                    Random.Range(boundingBox.bounds.min.z, boundingBox.bounds.max.z)),
-                    Random.rotation);
+                GameObject newObj = null;
+
+                if (!randomizedSpawn)
+                {
+
+                    newObj = Instantiate(newRandomObj,
+                        new Vector3(ii * 2, i * 2, 0), Quaternion.identity);
+                }
+                else
+                {
+                    newObj = Instantiate(newRandomObj,
+                             new Vector3(Random.Range(boundingBox.bounds.min.x, boundingBox.bounds.max.x),
+                                         Random.Range(boundingBox.bounds.min.y, boundingBox.bounds.max.y),
+                                         Random.Range(boundingBox.bounds.min.z, boundingBox.bounds.max.z)),
+                                         Random.rotation);
+                }
 
                 newObj.name = newRandomObj.name + " " + ii;
             }
