@@ -4,23 +4,30 @@ using UnityEngine;
 
 public class MergerTool_Component : MonoBehaviour
 {
-    [SerializeField] private string ID = "";
-    [SerializeField] private Material customMaterial = null;
-    [SerializeField] private int matIndex = 0;
 
-    [SerializeField] private MaterialMaker materialMaker = null;
-    [SerializeField] private MeshRegistry meshRegistry = null;
+    [SerializeField] public string ID;
+    [SerializeField] public Material customMaterial;
+    [SerializeField] public int prefabIndex;
+
+    [SerializeField] public MaterialMaker materialMaker;
+    [SerializeField] public MeshRegistry meshRegistry;
 
     private void Start()
     {
         //Load the new material here
         if (null != customMaterial) { GetComponent<Renderer>().material = customMaterial; }
+
+        if( null != meshRegistry)
+        {
+            //Debug.Log("Checking Nearest In: " + gameObject.name);
+            meshRegistry.MergeToRoot(gameObject, ID, prefabIndex);
+        }
     }
 
     public void ConstructComponent(MaterialMaker matMaker, MeshRegistry meshReg, string setID, int materailIndex)
     {
         ID = setID;
-        matIndex = materailIndex;
+        prefabIndex = materailIndex;
         materialMaker = matMaker;
         meshRegistry = meshReg;
         customMaterial = materialMaker.getMaterial(ID);
@@ -39,7 +46,7 @@ public class MergerTool_Component : MonoBehaviour
         for (int i = 0; i < GetComponent<MeshFilter>().sharedMesh.uv.Length; i++)
         {
             uvList.Add(new Vector3(GetComponent<MeshFilter>().sharedMesh.uv[i].x,
-                                   GetComponent<MeshFilter>().sharedMesh.uv[i].y, matIndex));
+                                   GetComponent<MeshFilter>().sharedMesh.uv[i].y, prefabIndex));
         }
         GetComponent<MeshFilter>().sharedMesh.SetUVs(0, uvList);
     }

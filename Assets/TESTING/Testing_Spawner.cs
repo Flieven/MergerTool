@@ -27,11 +27,13 @@ public class Testing_Spawner : MonoBehaviour
             {
                 GameObject newRandomObj = spawnArray[i].objectToSpawn;
 
-                Instantiate(newRandomObj,
+                GameObject newObj = Instantiate(newRandomObj,
                     new Vector3(Random.Range(boundingBox.bounds.min.x, boundingBox.bounds.max.x),
                     Random.Range(boundingBox.bounds.min.y, boundingBox.bounds.max.y),
                     Random.Range(boundingBox.bounds.min.z, boundingBox.bounds.max.z)),
                     Random.rotation);
+
+                newObj.name = newRandomObj.name + " " + ii;
             }
         }
     }
