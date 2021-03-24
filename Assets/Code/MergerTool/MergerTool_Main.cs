@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
+public struct PrefabStruct
+{
+    public GameObject prefab;
+    public float maximumDistanceToRoot;
+}
+
+[System.Serializable]
 public class DataPacket
 {
     public string ID;
-    public float maximumDistanceToRoot = 10.0f; // Make this be per Prefab instead!
-    public GameObject[] prefabs;
+    public PrefabStruct[] prefabs;
+    //public float maximumDistanceToRoot = 10.0f; // Make this be per Prefab instead!
+    //public GameObject[] prefabs;
     public Texture2DStruct textureRegistry;
 }
 
@@ -35,11 +43,11 @@ public class MergerTool_Main : MonoBehaviour
         {
             for (int ii = 0; ii < dataSets[i].prefabs.Length; ii++)
             {
-                if (null == dataSets[i].prefabs[ii].GetComponent<MergerTool_Component>())
+                if (null == dataSets[i].prefabs[ii].prefab.GetComponent<MergerTool_Component>())
                 {
-                    dataSets[i].prefabs[ii].AddComponent<MergerTool_Component>();
+                    dataSets[i].prefabs[ii].prefab.AddComponent<MergerTool_Component>();
                 }
-                dataSets[i].prefabs[ii].GetComponent<MergerTool_Component>().ConstructComponent(matMaker, meshRegistry, dataSets[i].ID, ii, dataSets[i].maximumDistanceToRoot);
+                dataSets[i].prefabs[ii].prefab.GetComponent<MergerTool_Component>().ConstructComponent(matMaker, meshRegistry, dataSets[i].ID, ii, dataSets[i].prefabs[ii].maximumDistanceToRoot);
             }
         }
     }
@@ -50,7 +58,7 @@ public class MergerTool_Main : MonoBehaviour
         {
             for (int ii = 0; ii < dataSets[i].prefabs.Length; ii++)
             {
-                dataSets[i].prefabs[ii].GetComponent<MergerTool_Component>().DestroyComponent();
+                dataSets[i].prefabs[ii].prefab.GetComponent<MergerTool_Component>().DestroyComponent();
             }
         }
 

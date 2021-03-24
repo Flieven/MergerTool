@@ -38,9 +38,9 @@ public class Texture2DRegistry : MonoBehaviour
     {
         for (int i = 0; i < packet.textureRegistry.registrySize; i++)
         {
-            if(null != packet.prefabs[i].GetComponent<Renderer>())
+            if(null != packet.prefabs[i].prefab.GetComponent<Renderer>())
             {
-                Material currentMat = packet.prefabs[i].GetComponent<Renderer>().sharedMaterial;
+                Material currentMat = packet.prefabs[i].prefab.GetComponent<Renderer>().sharedMaterial;
 
                 if(null != currentMat.mainTexture) { packet.textureRegistry.diffuse.array[i] = currentMat.mainTexture as Texture2D; }
                 else { Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a mainTexture >>>"); }
@@ -50,7 +50,7 @@ public class Texture2DRegistry : MonoBehaviour
 
             }
             
-            else { throw new System.Exception("!!! ERROR: No Renderer component found on prefab object: '" + packet.prefabs[i].name + "' !!!"); }
+            else { throw new System.Exception("!!! ERROR: No Renderer component found on prefab object: '" + packet.prefabs[i].prefab.name + "' !!!"); }
         }
     }
 
