@@ -49,6 +49,9 @@
         // #pragma instancing_options assumeuniformscaling
         UNITY_INSTANCING_BUFFER_START(Props)
             // put more per-instance properties here
+            /*UNITY_DEFINE_INSTANCED_PROP(2DArray, _MainTex)*/
+            //UNITY_DEFINE_INSTANCED_PROP(2DArray, _BumpMap)
+            /*UNITY_DEFINE_INSTANCED_PROP(float, arrayIndex)*/
         UNITY_INSTANCING_BUFFER_END(Props)
 
         void vert(inout appdata_full v, out Input o)

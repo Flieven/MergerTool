@@ -57,7 +57,7 @@ public class KDTree
 
     }
 
-    public Node Nearest(Node current, Vector3 goal, Node currentBest, int depth)
+    public Node Nearest(Node current, Vector3 goal, Node currentBest, int depth, bool fastSearch)
     {
 
         Node goodSide;
@@ -116,10 +116,11 @@ public class KDTree
         else
         { throw new System.Exception("!!! ERROR: currentDepth % kDepth Gave Unexpected Return: '" + currentDepth % kDepth + "' !!!"); }
 
-        currentBest = Nearest(goodSide, goal, currentBest, depth++);
+        currentBest = Nearest(goodSide, goal, currentBest, depth++, fastSearch);
 
         //Having this will check the entire Tree BUT it will be slower because of it!
-        currentBest = Nearest(badSide, goal, currentBest, depth++);
+        if(!fastSearch)
+        { currentBest = Nearest(badSide, goal, currentBest, depth++, fastSearch); }
 
         return currentBest;
 

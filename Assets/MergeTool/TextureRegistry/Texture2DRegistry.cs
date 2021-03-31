@@ -17,10 +17,11 @@ public struct Texture2DStruct
     public Texture2DArrays normal;
 }
 
+[AddComponentMenu("MergerTool/Required Components/Texture Registry")]
 [System.Serializable]
 public class Texture2DRegistry : MonoBehaviour
 {
-    public void Run(DataPacket packet)
+    public void Run(MergeTool.DataPacket packet)
     {
         for (int i = 0; i < packet.textureRegistry.registrySize; i++)
         {
@@ -34,7 +35,7 @@ public class Texture2DRegistry : MonoBehaviour
         }
     }
 
-    void ExtractTextures(DataPacket packet)
+    void ExtractTextures(MergeTool.DataPacket packet)
     {
         for (int i = 0; i < packet.textureRegistry.registrySize; i++)
         {

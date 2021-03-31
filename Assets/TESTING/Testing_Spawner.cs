@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MergeTool;
 
 [System.Serializable]
 public struct SpawnSets
@@ -17,6 +18,19 @@ public class Testing_Spawner : MonoBehaviour
     [SerializeField] private SpawnSets[] spawnArray = null;
 
     private BoxCollider boundingBox = null;
+
+    private void Awake()
+    {
+        PrefabStruct[] myStruct = new PrefabStruct[4]
+        {
+            new PrefabStruct(spawnArray[3].objectToSpawn, 5, true),
+            new PrefabStruct(spawnArray[0].objectToSpawn, 15, true),
+            new PrefabStruct(spawnArray[1].objectToSpawn, 15, true),
+            new PrefabStruct(spawnArray[2].objectToSpawn, 15, true)
+        };
+
+        MergerTool.main.Add_DataPacket("CodePacket", myStruct);
+    }
 
     // Start is called before the first frame update
     void Start()

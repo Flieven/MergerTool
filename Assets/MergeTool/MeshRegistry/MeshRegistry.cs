@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("MergerTool/Required Components/Mesh Registry")]
 public class MeshRegistry : MonoBehaviour
 {
     Dictionary<string, Dictionary<int, KDTree>> posDictionary = new Dictionary<string, Dictionary<int, KDTree>>();
+    bool fastSearch = true;
     public void MergeToRoot(GameObject obj, string ID, int prefabIndex, float maxDistance)
     {
         if(!posDictionary.ContainsKey(ID))
@@ -26,7 +28,7 @@ public class MeshRegistry : MonoBehaviour
             return;
         }
 
-        Node nearestFound = posDictionary[ID][prefabIndex].Nearest(posDictionary[ID][prefabIndex].getRoot, obj.transform.position, null, 0);
+        Node nearestFound = posDictionary[ID][prefabIndex].Nearest(posDictionary[ID][prefabIndex].getRoot, obj.transform.position, null, 0, fastSearch);
 
         if(Vector3.Distance(nearestFound.pos, obj.transform.position) <= maxDistance)
         { 
@@ -38,8 +40,14 @@ public class MeshRegistry : MonoBehaviour
         }
         else 
         {
-            Debug.Log("===== Nearest: '" + nearestFound.obj.name + "' Not Near Enough To: '" + obj.name + "' Using It To Create New Root =====");
+            //Debug.Log("===== Nearest: '" + nearestFound.obj.name + "' Not Near Enough To: '" + obj.name + "' Using It To Create New Root =====");
             posDictionary[ID][prefabIndex].AddNewNode(nearestFound, obj); 
         }
+    }
+
+    public bool FastSearch 
+    {
+        get { return fastSearch; }
+        set { fastSearch = value; }
     }
 }

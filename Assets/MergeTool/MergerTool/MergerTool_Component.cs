@@ -1,20 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MergeTool;
 
+[AddComponentMenu("MergerTool/MergerTool Component")]
 public class MergerTool_Component : MonoBehaviour
 {
 
     [SerializeField] public string ID;
-    [SerializeField] public float maximumDistanceToRoot;
-    [SerializeField] public Material customMaterial;
-    [SerializeField] public int prefabIndex;
+    [ReadOnly] [SerializeField] public float maximumDistanceToRoot;
+    [ReadOnly] [SerializeField] public Material customMaterial;
+    [ReadOnly] [SerializeField] public int prefabIndex;
+    [ReadOnly] [SerializeField] public bool isStatic;
 
-    [SerializeField] public MaterialMaker materialMaker;
-    [SerializeField] public MeshRegistry meshRegistry;
+    [ReadOnly] [SerializeField] public MeshRegistry meshRegistry;
+
+    public bool wasAddedManually = true;
+    [ReadOnly] public List<Vector3> uvList;
 
     private void Start()
     {
+        ConstructComponent(MergerTool.main.getData(ID, this));
+
         //Load the new material here
         if (null != customMaterial) { GetComponent<Renderer>().material = customMaterial; }
 
@@ -25,14 +32,18 @@ public class MergerTool_Component : MonoBehaviour
         }
     }
 
-    public void ConstructComponent(MaterialMaker matMaker, MeshRegistry meshReg, string setID, int materailIndex, float maxDist)
+    public void ConstructComponent(DataPacket packet)
     {
-        ID = setID;
-        maximumDistanceToRoot = maxDist;
-        prefabIndex = materailIndex;
-        materialMaker = matMaker;
-        meshRegistry = meshReg;
-        customMaterial = materialMaker.getMaterial(ID);
+        for (int i = 0; i < packet.prefabs.Length; i++)
+        {
+            if (packet.prefabs[i].prefab.GetComponent<MeshFilter>().sharedMesh == gameObject.GetComponent<MeshFilter>().sharedMesh)
+            {
+                prefabIndex = i;
+                maximumDistanceToRoot = packet.prefabs[i].maximumDistanceToRoot;
+                this.isStatic = packet.prefabs[i].isStatic;
+            }
+        }
+        customMaterial = packet.mergedMaterial;
         UpdateUVs();
     }
 
@@ -43,14 +54,14 @@ public class MergerTool_Component : MonoBehaviour
 
     void UpdateUVs()
     {
-        List<Vector3> uvList = new List<Vector3>();
+        uvList = new List<Vector3>();
 
         for (int i = 0; i < GetComponent<MeshFilter>().sharedMesh.uv.Length; i++)
         {
             uvList.Add(new Vector3(GetComponent<MeshFilter>().sharedMesh.uv[i].x,
                                    GetComponent<MeshFilter>().sharedMesh.uv[i].y, prefabIndex));
         }
-        GetComponent<MeshFilter>().sharedMesh.SetUVs(0, uvList);
+        GetComponent<MeshFilter>().mesh.SetUVs(0, uvList);
     }
 
     public void MergeMesh()
@@ -67,12 +78,12 @@ public class MergerTool_Component : MonoBehaviour
         {
             combine[i].mesh = meshFilters[i].sharedMesh;
             combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
-            meshFilters[i].gameObject.SetActive(false);
+            if (isStatic) { meshFilters[i].gameObject.SetActive(false); }
             i++;
         }
 
         gameObject.transform.GetComponent<MeshFilter>().mesh = new Mesh();
-        gameObject.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+        gameObject.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, isStatic);
         gameObject.transform.gameObject.SetActive(true);
 
         gameObject.transform.position = originalPos;
