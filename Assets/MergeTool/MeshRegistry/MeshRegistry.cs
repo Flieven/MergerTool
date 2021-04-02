@@ -25,6 +25,7 @@ public class MeshRegistry : MonoBehaviour
         {
             Debug.Log("===== Created New Root In Lower Dictionary '" + prefabIndex + "' In Upper Registry: '" + ID + "' Using Object: '" + obj.name + "' =====");
             posDictionary[ID][prefabIndex].AddNewNode(null, obj);
+            posDictionary[ID][prefabIndex].getRoot.obj.GetComponent<MergerTool_Component>().MergeMesh();
             return;
         }
 
@@ -35,7 +36,7 @@ public class MeshRegistry : MonoBehaviour
             //Debug.Log("===== Found Nearest: '" + nearestFound.obj.name + "' Within minimumDistance To '" + obj.name + "' =====");
             
             // PARENT/MERGE THE OBJECTS HERE
-            obj.transform.SetParent(nearestFound.obj.transform);
+            obj.transform.SetParent(nearestFound.parentObj.transform);
             nearestFound.obj.GetComponent<MergerTool_Component>().MergeMesh();
         }
         else 
@@ -43,6 +44,22 @@ public class MeshRegistry : MonoBehaviour
             //Debug.Log("===== Nearest: '" + nearestFound.obj.name + "' Not Near Enough To: '" + obj.name + "' Using It To Create New Root =====");
             posDictionary[ID][prefabIndex].AddNewNode(nearestFound, obj); 
         }
+    }
+
+    public Node getNearest(GameObject obj, string ID, int prefabIndex, float maxDistance)
+    {
+        Node nearestFound = posDictionary[ID][prefabIndex].Nearest(posDictionary[ID][prefabIndex].getRoot, obj.transform.position, null, 0, fastSearch);
+
+        if (Vector3.Distance(nearestFound.pos, obj.transform.position) <= maxDistance)
+        {
+            return nearestFound;
+        }
+        else
+        {
+            //Debug.Log("===== Nearest: '" + nearestFound.obj.name + "' Not Near Enough To: '" + obj.name + "' Using It To Create New Root =====");
+            posDictionary[ID][prefabIndex].AddNewNode(nearestFound, obj);
+        }
+        return null;
     }
 
     public bool FastSearch 

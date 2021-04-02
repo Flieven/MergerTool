@@ -11,7 +11,7 @@ public class MaterialMaker : MonoBehaviour
 
     Texture2DRegistry textureRegistry = null;
 
-    public Material Run(MergeTool.DataPacket packet)
+    public Material Run(DataPacket packet)
     {
 
         string filePath = System.IO.Path.Combine("Assets", "MergeTool", "TextureRegistry", "MergerShader.shader");
@@ -29,20 +29,31 @@ public class MaterialMaker : MonoBehaviour
        throw new System.Exception("!!! ERROR: Both If/Else ignored in MaterialMaker.Run() !!!");
     }
 
-    Material CreateCustomMaterials(MergeTool.DataPacket packet)
+    Material CreateCustomMaterials(DataPacket packet)
     {
         Material newMat = new Material(mergeShader);
         ApplyTextureData(newMat, packet);
         return newMat;
     }
 
-    void ApplyTextureData(Material mat, MergeTool.DataPacket packet)
+    void ApplyTextureData(Material mat, DataPacket packet)
     {
         //Set the diffuse texture
-        mat.SetTexture("_MainTex", textureRegistry.MakeTexture2DArray(packet.textureRegistry.diffuse, packet.ID));
+        mat.SetTexture("_MainTex", textureRegistry.MakeTexture2DArray(packet.textureRegistry.diffuse, packet.ID, packet.textureSize));
 
         //Set the normal texture
-        mat.SetTexture("_BumpMap", textureRegistry.MakeTexture2DArray(packet.textureRegistry.normal, packet.ID));
+        mat.SetTexture("_BumpMap", textureRegistry.MakeTexture2DArray(packet.textureRegistry.normal, packet.ID, packet.textureSize));
+
+        //NOT YET IMPLEMENTED IN SHADER
+
+        ////Set the height texture
+        //mat.SetTexture("_ParallaxMap", textureRegistry.MakeTexture2DArray(packet.textureRegistry.height, packet.ID, packet.textureSize));
+        
+        ////Set the occlusion texture
+        //mat.SetTexture("_OcclusionMap", textureRegistry.MakeTexture2DArray(packet.textureRegistry.occlusion, packet.ID, packet.textureSize));
+       
+        ////Set the detailMask texture
+        //mat.SetTexture("_DetailMask", textureRegistry.MakeTexture2DArray(packet.textureRegistry.detailMask, packet.ID, packet.textureSize));
 
         mat.name = "MergedMaterial_" + packet.ID;
     }

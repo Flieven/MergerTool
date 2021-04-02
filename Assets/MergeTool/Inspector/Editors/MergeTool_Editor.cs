@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using MergeTool;
 
 [CustomEditor(typeof(MergerTool)), CanEditMultipleObjects]
 public class MergeTool_Editor : Editor

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using MergeTool;
 
 [CustomEditor(typeof(MergerTool_Component)), CanEditMultipleObjects]
 public class MergeTool_Component_Editor : Editor
@@ -15,6 +14,7 @@ public class MergeTool_Component_Editor : Editor
     #region SerializedPRoperties
     SerializedProperty ID;
     SerializedProperty distanceToRoot;
+    SerializedProperty isStatic;
     SerializedProperty material;
     SerializedProperty prefabIndex;
     SerializedProperty meshRegistry;
@@ -33,6 +33,7 @@ public class MergeTool_Component_Editor : Editor
     private void PopulateProperties()
     {
         ID = serializedTarget.FindProperty("ID");
+        isStatic = serializedTarget.FindProperty("isStatic");
         distanceToRoot = serializedTarget.FindProperty("maximumDistanceToRoot");
         material = serializedTarget.FindProperty("customMaterial");
         prefabIndex = serializedTarget.FindProperty("prefabIndex");
@@ -47,7 +48,7 @@ public class MergeTool_Component_Editor : Editor
 
         EditorGUILayout.PropertyField(ID);
 
-        showData = EditorGUILayout.Foldout(showData, new GUIContent("Data", "All data currently used by component.\nNOTE: Read Only"));
+        showData = EditorGUILayout.Foldout(showData, new GUIContent("[READ ONLY] Data", "All data currently used by component.\nNOTE: Read Only"));
         if(showData)
         {
             EditorGUILayout.BeginVertical(new GUIStyle("HelpBox"));
@@ -60,6 +61,11 @@ public class MergeTool_Component_Editor : Editor
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Distance To Root Object");
             EditorGUILayout.PropertyField(distanceToRoot, GUIContent.none);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Is Static Object");
+            EditorGUILayout.PropertyField(isStatic, GUIContent.none);
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space();

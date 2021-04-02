@@ -10,6 +10,14 @@
         _BumpScale("Scale", Float) = 1.0
         [Normal] _BumpMap("Normal Map", 2DArray) = "bump" {}
 
+        _ParallaxMap("Height Map", 2DArray) = "black" {}
+        _Parallax("Height Scale", Range(0.005, 0.08)) = 0.02
+
+        _OcclusionMap("Occlusion", 2DArray) = "white" {}
+        _OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
+
+        _DetailMask("Detail Mask", 2DArray) = "white" {}
+
         [HideInInspector] _ZOffset("Z Buffer Offset", int) = 0
         //_ArrayIndex("2DArray Index", int) = 0
     }
@@ -36,6 +44,7 @@
         {
             float2 uv_MainTex;
             float2 uv_BumpMap;
+            float2 uv_ParallaxMap;
             float arrayIndex;
         };
 
@@ -58,6 +67,8 @@
         {
             o.uv_MainTex = v.texcoord.xy;
             o.uv_BumpMap = v.texcoord.xy;
+            o.uv_ParallaxMap = v.texcoord.xy;
+
             o.arrayIndex = v.texcoord.z;
         }
 

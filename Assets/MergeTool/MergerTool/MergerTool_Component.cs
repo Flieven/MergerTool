@@ -1,22 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MergeTool;
 
 [AddComponentMenu("MergerTool/MergerTool Component")]
 public class MergerTool_Component : MonoBehaviour
 {
 
     [SerializeField] public string ID;
-    [ReadOnly] [SerializeField] public float maximumDistanceToRoot;
-    [ReadOnly] [SerializeField] public Material customMaterial;
-    [ReadOnly] [SerializeField] public int prefabIndex;
-    [ReadOnly] [SerializeField] public bool isStatic;
+    [ReadOnly] [SerializeField] private float maximumDistanceToRoot;
+    [ReadOnly] [SerializeField] private Material customMaterial;
+    [ReadOnly] [SerializeField] private int prefabIndex;
+    [ReadOnly] [SerializeField] private bool isStatic = true;
 
     [ReadOnly] [SerializeField] public MeshRegistry meshRegistry;
 
     public bool wasAddedManually = true;
-    [ReadOnly] public List<Vector3> uvList;
+    [ReadOnly] [SerializeField] private List<Vector3> uvList;
 
     private void Start()
     {
@@ -25,7 +24,7 @@ public class MergerTool_Component : MonoBehaviour
         //Load the new material here
         if (null != customMaterial) { GetComponent<Renderer>().material = customMaterial; }
 
-        if( null != meshRegistry)
+        if( null != meshRegistry && isStatic)
         {
             //Debug.Log("Checking Nearest In: " + gameObject.name);
             meshRegistry.MergeToRoot(gameObject, ID, prefabIndex, maximumDistanceToRoot);
@@ -40,7 +39,7 @@ public class MergerTool_Component : MonoBehaviour
             {
                 prefabIndex = i;
                 maximumDistanceToRoot = packet.prefabs[i].maximumDistanceToRoot;
-                this.isStatic = packet.prefabs[i].isStatic;
+                isStatic = packet.prefabs[i].isStatic;
             }
         }
         customMaterial = packet.mergedMaterial;
@@ -66,10 +65,12 @@ public class MergerTool_Component : MonoBehaviour
 
     public void MergeMesh()
     {
-        Vector3 originalPos = gameObject.transform.position;
-        gameObject.transform.position = Vector3.zero;
+        Vector3 originalPos = gameObject.transform.parent.position;
+        gameObject.transform.parent.position = Vector3.zero;
 
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
+        gameObject.transform.parent.GetComponent<MeshRenderer>().material = customMaterial;
+
+        MeshFilter[] meshFilters = gameObject.transform.parent.GetComponentsInChildren<MeshFilter>();
         CombineInstance[] combine = new CombineInstance[meshFilters.Length];
 
         int i = 0;
@@ -82,11 +83,33 @@ public class MergerTool_Component : MonoBehaviour
             i++;
         }
 
-        gameObject.transform.GetComponent<MeshFilter>().mesh = new Mesh();
-        gameObject.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, isStatic);
-        gameObject.transform.gameObject.SetActive(true);
+        gameObject.transform.parent.GetComponent<MeshFilter>().mesh = new Mesh();
+        gameObject.transform.parent.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, isStatic); 
 
-        gameObject.transform.position = originalPos;
+        gameObject.transform.parent.gameObject.SetActive(true);
+
+        gameObject.transform.parent.position = originalPos;
     }
+
+    //public void UpdateMergeMesh()
+    //{
+    //    // FUTURE FEATURE TO ALLOW UPDATING THE PARENTED GROUPS OF NON-STATIC OBJECTS
+    //    // Started doing this but realized I'd probably be better of finishing up for a presentable alpha, if you're reading this please ignore this feature as of right now.
+
+    //    //if (null != meshRegistry && isStatic)
+    //    //{
+    //    //    //Debug.Log("Checking Nearest In: " + gameObject.name);
+    //    //    Node nearest = meshRegistry.getNearest(gameObject, ID, prefabIndex, maximumDistanceToRoot);
+
+    //    //    if(null == nearest)
+    //    //    {
+    //    //        Debug.Log("===== Updating Merge for: '" + gameObject.name + "' nearest returned null, assuming new Root established. =====");
+    //    //    }
+    //    //    else if(null != nearest)
+    //    //    {
+    //    //        GameObject oldParent = gameObject.transform.parent.gameObject;
+    //    //    }
+    //    //}
+    //}
 
 }

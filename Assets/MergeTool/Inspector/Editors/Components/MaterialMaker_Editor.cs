@@ -7,6 +7,6 @@ public class MaterialMaker_Editor : Editor
     private void OnEnable()
     {
         MaterialMaker tool = (MaterialMaker)target;
-        tool.hideFlags = HideFlags.NotEditable;
+        //tool.hideFlags = HideFlags.NotEditable;
     }
 }

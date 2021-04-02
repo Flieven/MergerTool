@@ -7,6 +7,6 @@ public class MeshRegistry_Editor : Editor
     private void OnEnable()
     {
         MeshRegistry tool = (MeshRegistry)target;
-        tool.hideFlags = HideFlags.NotEditable;
+        //tool.hideFlags = HideFlags.NotEditable;
     }
 }

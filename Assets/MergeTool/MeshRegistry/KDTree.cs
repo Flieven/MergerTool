@@ -7,12 +7,24 @@ public class Node
     public int depth = 0;
     public Vector3 pos = Vector3.zero;
     public GameObject obj = null;
+    public GameObject parentObj = null;
     public Node lesser, greater;
 
     public Node(GameObject objRef, int currentDepth)
     {
+        parentObj = new GameObject();
+        parentObj.AddComponent<MeshFilter>();
+        parentObj.AddComponent<MeshRenderer>();
+
+        parentObj.GetComponent<MeshFilter>().mesh = new Mesh();
+
         obj = objRef;
+
+        parentObj.name = "RootObject " + obj.GetComponent<MeshFilter>().sharedMesh.name;
+
         pos = obj.transform.position;
+        parentObj.transform.position = pos;
+
         depth = currentDepth;
     }
 }
@@ -29,12 +41,14 @@ public class KDTree
         {
             newNode = new Node(obj, 0);
             root = newNode;
+            obj.transform.SetParent(root.parentObj.transform);
             return;
         }
 
         if(null != nearest)
         {
             newNode = new Node(obj, nearest.depth++);
+            obj.transform.SetParent(newNode.parentObj.transform);
 
             if (nearest.depth % kDepth == 0)
             {

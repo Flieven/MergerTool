@@ -7,6 +7,6 @@ public class Texture2DRegistry_Editor : Editor
     private void OnEnable()
     {
         Texture2DRegistry tool = (Texture2DRegistry)target;
-        tool.hideFlags = HideFlags.NotEditable;
+        //tool.hideFlags = HideFlags.NotEditable;
     }
 }

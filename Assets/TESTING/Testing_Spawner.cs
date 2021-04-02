@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MergeTool;
 
 [System.Serializable]
 public struct SpawnSets
@@ -21,6 +20,10 @@ public class Testing_Spawner : MonoBehaviour
 
     private void Awake()
     {
+    }
+
+    private void MakeNewPacket()
+    {
         PrefabStruct[] myStruct = new PrefabStruct[4]
         {
             new PrefabStruct(spawnArray[3].objectToSpawn, 5, true),
@@ -35,6 +38,8 @@ public class Testing_Spawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if(null != MergerTool.main) { MakeNewPacket(); }
+
         boundingBox = GetComponent<BoxCollider>();
 
         for (int i = 0; i < spawnArray.Length; i++)
@@ -50,6 +55,10 @@ public class Testing_Spawner : MonoBehaviour
 
                     newObj = Instantiate(newRandomObj,
                         new Vector3(ii * 2, i * 2, 0), Quaternion.identity);
+                    if (i == 2)
+                    {
+                        MergerTool.main.Add_MergeToolComponent(newObj, "CodePacket");
+                    }
                 }
                 else
                 {
@@ -64,5 +73,4 @@ public class Testing_Spawner : MonoBehaviour
             }
         }
     }
-
 }

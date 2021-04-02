@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(MergeTool.DataPacket))]
+[CustomPropertyDrawer(typeof(DataPacket))]
 public class DataPacket_Drawer : PropertyDrawer
 {
     #region SerializedProperties
@@ -24,7 +24,7 @@ public class DataPacket_Drawer : PropertyDrawer
                                 property.FindPropertyRelative("prefabs").FindPropertyRelative("Array.size").intValue * 2 : 0;
         }
         else { arraySizeModifier = 0; }
-        arraySizeModifier += property.isExpanded ? 3 : 1;
+        arraySizeModifier += property.isExpanded ? 4 : 1;
 
         return ( staticPropertyHeight * arraySizeModifier) + ((int)EditorGUIUtility.standardVerticalSpacing * arraySizeModifier) + 10;
     }
@@ -66,8 +66,19 @@ public class DataPacket_Drawer : PropertyDrawer
         if (property.isExpanded)
         {
             position.y += position.height + EditorGUIUtility.standardVerticalSpacing;
-            Rect MaterialRect = new Rect(position.x, position.y, position.width * 0.98f, position.height);
-            EditorGUI.PropertyField(MaterialRect, property.FindPropertyRelative("mergedMaterial"), new GUIContent(" Merged Material"));
+
+            // READ ONLY MATERIAL SHOWCASE FOR DEBUG
+            Rect textureSizeRect = new Rect(position.x + position.width * 0.48f, position.y, position.width * 0.5f, position.height);
+            Rect textureSizeRectLabel = new Rect(position.x, position.y, position.width * 0.98f, position.height);
+            EditorGUI.LabelField(textureSizeRectLabel, new GUIContent("[READ ONLY] Texture Size", "Size of textures within this data packet.\nValue provided by albedo texture of prefab 0.\nNOTE: Read Only."));
+            EditorGUI.PropertyField(textureSizeRect, property.FindPropertyRelative("textureSize"), GUIContent.none);
+            position.y += position.height + EditorGUIUtility.standardVerticalSpacing;
+
+            // READ ONLY MATERIAL SHOWCASE FOR DEBUG
+            Rect MaterialRect = new Rect(position.x + position.width * 0.48f, position.y, position.width * 0.5f, position.height);
+            Rect MaterialRectLabel = new Rect(position.x, position.y, position.width * 0.98f, position.height);
+            EditorGUI.LabelField(MaterialRectLabel, new GUIContent("[READ ONLY] Merged Material", "Resulting optimized material used by prefabs within the data packet.\nNOTE: Read Only."));
+            EditorGUI.PropertyField(MaterialRect, property.FindPropertyRelative("mergedMaterial"), GUIContent.none);
             position.y += position.height + EditorGUIUtility.standardVerticalSpacing;
 
             PrefabArrayGUI(position, prefabArray, label);
@@ -89,14 +100,17 @@ public class DataPacket_Drawer : PropertyDrawer
         {
             for (int i = 0; i < arraySizeProp.intValue; i++)
             {
-                Rect DistanceRect = new Rect(position.x + position.width * 0.5f, position.y + (i * (position.height)), position.width - position.width * 0.52f, position.height);
-                Rect StaticRect = new Rect(position.x + position.width * 0.5f, position.y + position.height + (i * (position.height)), position.width - position.width * 0.52f, position.height);
+                Rect DistanceRect = new Rect(position.x + position.width * 0.5f, position.y + position.height + (i * (position.height)), position.width - position.width * 0.52f, position.height);
+                Rect StaticRect = new Rect(position.x + position.width * 0.5f, position.y + (i * (position.height)), position.width - position.width * 0.52f, position.height);
                 Rect ObjectRect = new Rect(position.x, position.y + ( i * (position.height)), position.width * 0.5f, position.height * 2.0f);
 
                 EditorGUI.PropertyField(ObjectRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("prefab"), GUIContent.none);
                 position.y += position.height + EditorGUIUtility.standardVerticalSpacing;
-                EditorGUI.PropertyField(DistanceRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("maximumDistanceToRoot"), new GUIContent("Max Distance To Root", "Maximum distance object can have from a mergeable Root object"));
-                EditorGUI.PropertyField(StaticRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("isStatic"), new GUIContent("Is Static", "Is the object static in the world?"));
+                EditorGUI.PropertyField(StaticRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("isStatic"), new GUIContent("Is Static", "Is the object static in the world?\nWill batch objects together under one Root."));
+                if(property.GetArrayElementAtIndex(i).FindPropertyRelative("isStatic").boolValue)
+                {
+                    EditorGUI.PropertyField(DistanceRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("maximumDistanceToRoot"), new GUIContent("Max Distance To Root", "Maximum distance object can have from a mergeable Root object"));
+                }
             }
         }
     }
