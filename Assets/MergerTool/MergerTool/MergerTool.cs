@@ -21,7 +21,7 @@ public struct PrefabStruct
 public class DataPacket
 {
     [SerializeField] public string ID;
-    [ReadOnly] [SerializeField] public int textureSize = 0;
+    [ReadOnly] [SerializeField] public Vector2 textureSize = Vector2.zero;
     [SerializeField] public PrefabStruct[] prefabs;
     [SerializeField] public Texture2DStruct textureRegistry;
     [ReadOnly] [SerializeField] public Material mergedMaterial;
@@ -105,7 +105,8 @@ public class MergerTool : MonoBehaviour
 
     private void PopulateDataSet(int index)
     {
-        dataPackets[index].textureSize = dataPackets[index].prefabs[0].prefab.GetComponent<Renderer>().sharedMaterial.mainTexture.width;
+        dataPackets[index].textureSize.x = dataPackets[index].prefabs[0].prefab.GetComponent<Renderer>().sharedMaterial.mainTexture.width;
+        dataPackets[index].textureSize.y = dataPackets[index].prefabs[0].prefab.GetComponent<Renderer>().sharedMaterial.mainTexture.height;
         dataPackets[index].textureRegistry.registrySize = dataPackets[index].prefabs.Length;
         dataPackets[index].mergedMaterial = matMaker.Run(dataPackets[index]);
     }

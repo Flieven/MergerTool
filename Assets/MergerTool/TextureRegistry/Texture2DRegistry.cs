@@ -50,21 +50,41 @@ public class Texture2DRegistry : MonoBehaviour
                 Material currentMat = packet.prefabs[i].prefab.GetComponent<Renderer>().sharedMaterial;
 
                 if(null != currentMat.mainTexture) { packet.textureRegistry.diffuse.array[i] = currentMat.mainTexture as Texture2D; }
-                else { Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a mainTexture >>>"); }
+                else 
+                { 
+                    Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a mainTexture >>>");
+                    packet.textureRegistry.diffuse.array = null;
+                }
                 
                 if (null != currentMat.GetTexture("_BumpMap")) { packet.textureRegistry.normal.array[i] = currentMat.GetTexture("_BumpMap") as Texture2D; }
-                else { Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a BumpMap >>>"); }
+                else 
+                { 
+                    Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a BumpMap >>>");
+                    packet.textureRegistry.normal.array = null;
+                }
 
                 //NOT YET IMPLEMENTED IN SHADER
 
                 if (null != currentMat.GetTexture("_ParallaxMap")) { packet.textureRegistry.height.array[i] = currentMat.GetTexture("_ParallaxMap") as Texture2D; }
-                else { Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a ParallaxMap >>>"); }
+                else 
+                { 
+                    Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a ParallaxMap >>>");
+                    packet.textureRegistry.height.array = null;
+                }
 
                 if (null != currentMat.GetTexture("_OcclusionMap")) { packet.textureRegistry.occlusion.array[i] = currentMat.GetTexture("_OcclusionMap") as Texture2D; }
-                else { Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a _OcclusionMap >>>"); }
+                else 
+                { 
+                    Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a _OcclusionMap >>>");
+                    packet.textureRegistry.occlusion.array = null;
+                }
 
                 if (null != currentMat.GetTexture("_DetailMask")) { packet.textureRegistry.detailMask.array[i] = currentMat.GetTexture("_DetailMask") as Texture2D; }
-                else { Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a _DetailMask >>>"); }
+                else 
+                { 
+                    Debug.LogWarning("<<< '" + currentMat.name + "' Does not contain a _DetailMask >>>");
+                    packet.textureRegistry.detailMask.array = null;
+                }
 
             }
             
@@ -72,9 +92,9 @@ public class Texture2DRegistry : MonoBehaviour
         }
     }
 
-    public Texture2DArray MakeTexture2DArray(Texture2DArrays currentArray, string ID, int textureSize)
+    public Texture2DArray MakeTexture2DArray(Texture2DArrays currentArray, string ID, Vector2 textureSize)
     {
-        Texture2DArray newT2DArray = new Texture2DArray(textureSize, textureSize, currentArray.array.Length, TextureFormat.ARGB32, false);
+        Texture2DArray newT2DArray = new Texture2DArray((int)textureSize.x, (int)textureSize.y, currentArray.array.Length, TextureFormat.ARGB32, false);
 
         for (int i = 0; i < currentArray.array.Length; i++)
         {

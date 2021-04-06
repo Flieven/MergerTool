@@ -39,10 +39,12 @@ public class MaterialMaker : MonoBehaviour
     void ApplyTextureData(Material mat, DataPacket packet)
     {
         //Set the diffuse texture
-        mat.SetTexture("_MainTex", textureRegistry.MakeTexture2DArray(packet.textureRegistry.diffuse, packet.ID, packet.textureSize));
+        if (null != packet.textureRegistry.diffuse.array)
+        { mat.SetTexture("_MainTex", textureRegistry.MakeTexture2DArray(packet.textureRegistry.diffuse, packet.ID, packet.textureSize)); }
 
         //Set the normal texture
-        mat.SetTexture("_BumpMap", textureRegistry.MakeTexture2DArray(packet.textureRegistry.normal, packet.ID, packet.textureSize));
+        if(null != packet.textureRegistry.normal.array)
+        { mat.SetTexture("_BumpMap", textureRegistry.MakeTexture2DArray(packet.textureRegistry.normal, packet.ID, packet.textureSize)); }
 
         //NOT YET IMPLEMENTED IN SHADER
 

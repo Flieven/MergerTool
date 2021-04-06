@@ -676,7 +676,7 @@ MonoBehaviour:
   fastTreeSearch: 1
   dataPackets:
   - ID: FirstSet
-    textureSize: 0
+    textureSize: {x: 0, y: 0}
     prefabs:
     - prefab: {fileID: 1087232998764721991, guid: 329362990c851d845872da015db786a5,
         type: 3}
@@ -704,7 +704,7 @@ MonoBehaviour:
         array: []
     mergedMaterial: {fileID: 0}
   - ID: SecondSet
-    textureSize: 0
+    textureSize: {x: 0, y: 0}
     prefabs:
     - prefab: {fileID: 453003638}
       maximumDistanceToRoot: 10
