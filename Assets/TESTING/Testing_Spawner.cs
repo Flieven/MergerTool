@@ -55,10 +55,10 @@ public class Testing_Spawner : MonoBehaviour
 
                     newObj = Instantiate(newRandomObj,
                         new Vector3(ii * 2, i * 2, 0), Quaternion.identity);
-                    if (i == 2)
-                    {
-                        MergerTool.main.Add_MergeToolComponent(newObj, "CodePacket");
-                    }
+                    //if (i == 2)
+                    //{
+                    //    MergerTool.main.Add_MergeToolComponent(newObj, "CodePacket");
+                    //}
                 }
                 else
                 {

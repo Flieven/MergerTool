@@ -14,7 +14,7 @@ public class MaterialMaker : MonoBehaviour
     public Material Run(DataPacket packet)
     {
 
-        string filePath = System.IO.Path.Combine("Assets", "MergeTool", "TextureRegistry", "MergerShader.shader");
+        string filePath = System.IO.Path.Combine("Assets", "MergerTool", "TextureRegistry", "MergerShader.shader");
         mergeShader = AssetDatabase.LoadAssetAtPath<Shader>(filePath);
 
         textureRegistry = GetComponent<Texture2DRegistry>();

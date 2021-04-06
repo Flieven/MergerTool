@@ -79,7 +79,7 @@ public class MergerTool : MonoBehaviour
         {
             for (int ii = 0; ii < dataPackets[i].prefabs.Length; ii++)
             {
-                if (null != dataPackets[i].prefabs[ii].prefab.GetComponent<MergerTool_Component>())
+                if (null != dataPackets[i].prefabs[ii].prefab && null != dataPackets[i].prefabs[ii].prefab.GetComponent<MergerTool_Component>())
                 {
                     if (dataPackets[i].prefabs[ii].prefab.GetComponent<MergerTool_Component>().wasAddedManually == false)
                     { dataPackets[i].prefabs[ii].prefab.GetComponent<MergerTool_Component>().DestroyComponent(); }
