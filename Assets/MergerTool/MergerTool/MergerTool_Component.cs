@@ -17,18 +17,54 @@ public class MergerTool_Component : MonoBehaviour
     public bool wasAddedManually = true;
     [ReadOnly] [SerializeField] private List<Vector3> uvList;
 
-    private void Start()
+    private void OnEnable()
+    {
+    }
+
+    private void HandleNewPacket(string ID)
+    {
+        if(ID == this.ID)
+        { 
+            Debug.Log("Observer for ID '" + ID + "' in object '" + gameObject.name + "' triggered!");
+            ApplyDataPacket();
+            MergerTool.packetObserver -= HandleNewPacket;
+        }
+    }
+
+    private void ApplyDataPacket()
     {
         ConstructComponent(MergerTool.main.getData(ID, this));
 
         //Load the new material here
         if (null != customMaterial) { GetComponent<Renderer>().material = customMaterial; }
 
-        if( null != meshRegistry && isStatic)
+        if (null != meshRegistry && isStatic)
         {
             //Debug.Log("Checking Nearest In: " + gameObject.name);
             meshRegistry.MergeToRoot(gameObject, ID, prefabIndex, maximumDistanceToRoot);
         }
+    }
+
+    private void Start()
+    {
+
+        if (MergerTool.main.hasData(ID)) { ApplyDataPacket(); }
+        else
+        {
+            Debug.Log("No data packet for ID '" + ID + "' observing if that changes!");
+            MergerTool.packetObserver += HandleNewPacket;
+        }
+
+        //ConstructComponent(MergerTool.main.getData(ID, this));
+
+        ////Load the new material here
+        //if (null != customMaterial) { GetComponent<Renderer>().material = customMaterial; }
+
+        //if( null != meshRegistry && isStatic)
+        //{
+        //    //Debug.Log("Checking Nearest In: " + gameObject.name);
+        //    meshRegistry.MergeToRoot(gameObject, ID, prefabIndex, maximumDistanceToRoot);
+        //}
     }
 
     public void ConstructComponent(DataPacket packet)

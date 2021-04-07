@@ -38,8 +38,6 @@ public class Testing_Spawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if(null != MergerTool.main) { MakeNewPacket(); }
-
         boundingBox = GetComponent<BoxCollider>();
 
         for (int i = 0; i < spawnArray.Length; i++)
@@ -55,6 +53,7 @@ public class Testing_Spawner : MonoBehaviour
 
                     newObj = Instantiate(newRandomObj,
                         new Vector3(ii * 2, i * 2, 0), Quaternion.identity);
+                    MergerTool.main.Add_MergeToolComponent(newObj, "CodePacket");
                     //if (i == 2)
                     //{
                     //    MergerTool.main.Add_MergeToolComponent(newObj, "CodePacket");
@@ -71,6 +70,17 @@ public class Testing_Spawner : MonoBehaviour
 
                 newObj.name = newRandomObj.name + " " + ii;
             }
+        }
+
+       // if (null != MergerTool.main) { MakeNewPacket(); }
+
+    }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.H))
+        {
+            if (null != MergerTool.main) { MakeNewPacket(); }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 [System.Serializable]
 public struct PrefabStruct
@@ -48,6 +49,8 @@ public class MergerTool : MonoBehaviour
     private MeshRegistry meshRegistry = null;
 
     public static MergerTool main;
+
+    public static event Action<string> packetObserver;
 
     private void Awake()
     {
@@ -109,6 +112,9 @@ public class MergerTool : MonoBehaviour
         dataPackets[index].textureSize.y = dataPackets[index].prefabs[0].prefab.GetComponent<Renderer>().sharedMaterial.mainTexture.height;
         dataPackets[index].textureRegistry.registrySize = dataPackets[index].prefabs.Length;
         dataPackets[index].mergedMaterial = matMaker.Run(dataPackets[index]);
+
+        if(null != packetObserver) { packetObserver(dataPackets[index].ID); }
+        else { Debug.Log("packetObserver was null"); }
     }
 
     public DataPacket getData(string ID, MergerTool_Component component)
@@ -120,6 +126,15 @@ public class MergerTool : MonoBehaviour
             if (dataPackets[i].ID == ID) { return dataPackets[i]; }
         }
         throw new System.Exception("!!! ERROR: No Datapacket with ID: '" + ID + "' Found !!!");
+    }
+
+    public bool hasData(string ID)
+    {
+        for (int i = 0; i < dataPackets.Count; i++)
+        {
+            if (dataPackets[i].ID == ID) { return true; }
+        }
+        return false;
     }
 
     #region AddFunctions
