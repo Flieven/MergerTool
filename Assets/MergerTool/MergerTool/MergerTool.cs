@@ -114,7 +114,7 @@ public class MergerTool : MonoBehaviour
         dataPackets[index].mergedMaterial = matMaker.Run(dataPackets[index]);
 
         if(null != packetObserver) { packetObserver(dataPackets[index].ID); }
-        else { Debug.Log("packetObserver was null"); }
+        else { Debug.Log("packetObserver was null, no items subscribed."); }
     }
 
     public DataPacket getData(string ID, MergerTool_Component component)

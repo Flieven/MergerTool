@@ -294,7 +294,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 709872263}
-  - component: {fileID: 709872262}
   - component: {fileID: 709872261}
   m_Layer: 0
   m_Name: Spawner
@@ -315,6 +314,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f9ec23e465da1643a4aa5faa8bbb7bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showCube: 1
+  minCorner: {x: -6, y: -6, z: -6}
+  maxCorner: {x: 5, y: 5, z: 5}
   randomizedSpawn: 0
   spawnArray:
   - objectToSpawn: {fileID: 1087232998764721991, guid: 329362990c851d845872da015db786a5,
@@ -329,19 +331,6 @@ MonoBehaviour:
   - objectToSpawn: {fileID: 2683119798344971435, guid: 1cd26ffe732045b42a92a97e65c5e649,
       type: 3}
     numObjectsToSpawn: 0
---- !u!65 &709872262
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 709872260}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 20, y: 20, z: 20}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &709872263
 Transform:
   m_ObjectHideFlags: 0
@@ -531,7 +520,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -30}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 1551277638}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -549,6 +539,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSpeed: 0.5
   cameraSensitivity: 0.25
+  heldObject: {fileID: 0}
+  heldObjectNode: {fileID: 1551277637}
 --- !u!1 &1349737301
 GameObject:
   m_ObjectHideFlags: 0
@@ -641,6 +633,36 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1551277637
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1551277638}
+  m_Layer: 0
+  m_Name: HeldObjectNode
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1551277638
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1551277637}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.42, y: -0.75, z: 0.558}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1314949536}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1737349588
 GameObject:
   m_ObjectHideFlags: 0
@@ -681,11 +703,11 @@ MonoBehaviour:
     - prefab: {fileID: 1087232998764721991, guid: 329362990c851d845872da015db786a5,
         type: 3}
       maximumDistanceToRoot: 15
-      isStatic: 1
+      isStatic: 0
     - prefab: {fileID: 2873500436656626182, guid: 99b82556e0eaf674abeff9dd61c26d75,
         type: 3}
-      maximumDistanceToRoot: 45
-      isStatic: 1
+      maximumDistanceToRoot: 10
+      isStatic: 0
     - prefab: {fileID: 2256349168775237284, guid: 9ac555ec78a772a48abd902166683c1f,
         type: 3}
       maximumDistanceToRoot: 23

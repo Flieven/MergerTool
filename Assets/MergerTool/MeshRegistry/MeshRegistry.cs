@@ -10,6 +10,8 @@ public class MeshRegistry : MonoBehaviour
 
     [SerializeField] private bool generateDebugLogs = false;
 
+    private int vertexLimit = 65536;
+
     public void MergeToRoot(GameObject obj, string ID, int prefabIndex, float maxDistance)
     {
         if(!posDictionary.ContainsKey(ID))
@@ -28,7 +30,7 @@ public class MeshRegistry : MonoBehaviour
         {
             if (generateDebugLogs) { Debug.Log("===== Created New Root In Lower Dictionary '" + prefabIndex + "' In Upper Registry: '" + ID + "' Using Object: '" + obj.name + "' ====="); }
             posDictionary[ID][prefabIndex].AddNewNode(null, obj);
-            posDictionary[ID][prefabIndex].getRoot.obj.GetComponent<MergerTool_Component>().MergeMesh();
+            CombineMeshes(obj, obj.GetComponent<MergerTool_Component>().IsStatic, obj.GetComponent<MergerTool_Component>().CustomMaterial);
             return;
         }
 
@@ -40,13 +42,97 @@ public class MeshRegistry : MonoBehaviour
             
             // PARENT/MERGE THE OBJECTS HERE
             obj.transform.SetParent(nearestFound.parentObj.transform);
-            nearestFound.obj.GetComponent<MergerTool_Component>().MergeMesh();
+            //nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CombineMeshes();
+            CombineMeshes(obj, obj.GetComponent<MergerTool_Component>().IsStatic, obj.GetComponent<MergerTool_Component>().CustomMaterial);
         }
         else 
         {
             //Debug.Log("===== Nearest: '" + nearestFound.obj.name + "' Not Near Enough To: '" + obj.name + "' Using It To Create New Root =====");
             posDictionary[ID][prefabIndex].AddNewNode(nearestFound, obj); 
         }
+    }
+
+    private void CombineMeshes(GameObject obj, bool isStatic, Material customMaterial)
+    {
+        Vector3 originalPos = obj.transform.parent.position;
+        obj.transform.parent.position = Vector3.zero;
+
+        obj.transform.parent.GetComponent<MeshRenderer>().material = customMaterial;
+
+        MeshFilter[] meshFilters = obj.transform.parent.GetComponentsInChildren<MeshFilter>();
+        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+
+        int i = 0;
+
+        while (i < meshFilters.Length)
+        {
+            combine[i].mesh = meshFilters[i].sharedMesh;
+            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+            if (isStatic) { meshFilters[i].gameObject.SetActive(false); }
+            else if (!isStatic && i > 0) { meshFilters[i].GetComponent<MeshRenderer>().enabled = false; }
+            i++;
+        }
+
+        obj.transform.parent.GetComponent<MeshFilter>().mesh = new Mesh();
+        obj.transform.parent.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, true);
+
+        if (obj.transform.parent.GetComponent<MeshFilter>().mesh.vertexCount > vertexLimit)
+        { throw new System.Exception("!!! ERROR: object '" + obj.transform.parent.name + "' has exceeded vertex limit on combined mesh, it's going to look really weird !!!"); }
+
+        if (isStatic) { obj.transform.parent.GetComponent<MeshCollider>().sharedMesh = obj.transform.parent.GetComponent<MeshFilter>().mesh; }
+
+        obj.transform.parent.gameObject.SetActive(true);
+
+        obj.transform.parent.position = originalPos;
+    }
+
+    public void DetachFromRoot(GameObject obj, string ID, int prefabIndex, float maxDistance)
+    {
+
+        Node nearestFound = null;
+        List<Node> proximityNodes = posDictionary[ID][prefabIndex].AllNodesInProximity(posDictionary[ID][prefabIndex].getRoot, obj.transform.position, 0, fastSearch, maxDistance);
+        foreach(Node node in proximityNodes)
+        {
+            if(node.parentObj.transform.Find(obj.name)) { nearestFound = node; }
+        }
+
+        if(null == nearestFound)
+        {
+            Debug.Log("!!! ERROR: Could not find object: '" + obj.name + "' in '" + nearestFound.parentObj.name + "' in KD tree !!!");
+            Debug.Log("List of objects searched: ");
+            foreach (Transform child in nearestFound.parentObj.transform)
+            { Debug.Log(child.gameObject.name); }
+        }
+
+        Debug.Log("<<< Found object: '" + obj.name + "' in '" + nearestFound.parentObj.name + "' in KD tree >>>");
+        obj.transform.parent = null;
+        obj.GetComponent<MeshRenderer>().enabled = true;
+
+        nearestFound.parentObj.GetComponent<MeshFilter>().mesh.Clear();
+        nearestFound.parentObj.GetComponent<MeshFilter>().mesh = null;
+
+        if(nearestFound.parentObj.transform.childCount > 0)
+        {
+            CombineMeshes(nearestFound.parentObj.transform.GetChild(0).gameObject,
+                          nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().IsStatic,
+                          nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CustomMaterial);
+        }
+        //nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CombineMeshes();
+
+        //if (nearestFound.parentObj.gameObject.transform.Find(obj.name))
+        //{ 
+        //    Debug.Log("<<< Found object: '" + obj.name + "' in '" + nearestFound.parentObj.name + "' in KD tree >>>");
+        //    obj.transform.parent = null;
+        //    obj.GetComponent<MeshRenderer>().enabled = true;
+
+        //    nearestFound.parentObj.GetComponent<MeshFilter>().mesh.Clear();
+        //    nearestFound.parentObj.GetComponent<MeshFilter>().mesh = null;
+
+        //    CombineMeshes(nearestFound.parentObj.transform.GetChild(0).gameObject,
+        //        nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().IsStatic,
+        //        nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CustomMaterial);
+        //    //nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CombineMeshes();
+        //}
     }
 
     public Node getNearest(GameObject obj, string ID, int prefabIndex, float maxDistance)

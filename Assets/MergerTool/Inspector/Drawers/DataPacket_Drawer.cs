@@ -106,11 +106,8 @@ public class DataPacket_Drawer : PropertyDrawer
 
                 EditorGUI.PropertyField(ObjectRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("prefab"), GUIContent.none);
                 position.y += position.height + EditorGUIUtility.standardVerticalSpacing;
-                EditorGUI.PropertyField(StaticRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("isStatic"), new GUIContent("Is Static", "Is the object static in the world?\nWill batch objects together under one Root."));
-                if(property.GetArrayElementAtIndex(i).FindPropertyRelative("isStatic").boolValue)
-                {
-                    EditorGUI.PropertyField(DistanceRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("maximumDistanceToRoot"), new GUIContent("Max Distance To Root", "Maximum distance object can have from a mergeable Root object"));
-                }
+                EditorGUI.PropertyField(StaticRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("isStatic"), new GUIContent("Is Static", "Is the object static in the world?\nIf false objects can be interacted with at individual level.\nNOTE: Do not call 'ReleaseFromRoot' on static objects!."));
+                EditorGUI.PropertyField(DistanceRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("maximumDistanceToRoot"), new GUIContent("Max Distance To Root", "Maximum distance object can have from a mergeable Root object"));
             }
         }
     }

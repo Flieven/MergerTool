@@ -9,14 +9,14 @@ public struct SpawnSets
     public int numObjectsToSpawn;
 }
 
-[RequireComponent(typeof(BoxCollider))]
 public class Testing_Spawner : MonoBehaviour
 {
-
+    [SerializeField] bool showCube = false;
+    [SerializeField] private Vector3 minCorner = Vector3.zero;
+    [SerializeField] private Vector3 maxCorner = Vector3.zero;
+    [Space]
     [SerializeField] private bool randomizedSpawn = true;
     [SerializeField] private SpawnSets[] spawnArray = null;
-
-    private BoxCollider boundingBox = null;
 
     private void Awake()
     {
@@ -38,8 +38,6 @@ public class Testing_Spawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        boundingBox = GetComponent<BoxCollider>();
-
         for (int i = 0; i < spawnArray.Length; i++)
         {
             for (int ii = 0; ii < spawnArray[i].numObjectsToSpawn; ii++)
@@ -53,7 +51,7 @@ public class Testing_Spawner : MonoBehaviour
 
                     newObj = Instantiate(newRandomObj,
                         new Vector3(ii * 2, i * 2, 0), Quaternion.identity);
-                    MergerTool.main.Add_MergeToolComponent(newObj, "CodePacket");
+                    //MergerTool.main.Add_MergeToolComponent(newObj, "CodePacket");
                     //if (i == 2)
                     //{
                     //    MergerTool.main.Add_MergeToolComponent(newObj, "CodePacket");
@@ -62,9 +60,9 @@ public class Testing_Spawner : MonoBehaviour
                 else
                 {
                     newObj = Instantiate(newRandomObj,
-                             new Vector3(Random.Range(boundingBox.bounds.min.x, boundingBox.bounds.max.x),
-                                         Random.Range(boundingBox.bounds.min.y, boundingBox.bounds.max.y),
-                                         Random.Range(boundingBox.bounds.min.z, boundingBox.bounds.max.z)),
+                             new Vector3(Random.Range(minCorner.x, maxCorner.x),
+                                         Random.Range(minCorner.y, maxCorner.y),
+                                         Random.Range(minCorner.z, maxCorner.z)),
                                          Random.rotation);
                 }
 
@@ -74,6 +72,19 @@ public class Testing_Spawner : MonoBehaviour
 
        // if (null != MergerTool.main) { MakeNewPacket(); }
 
+    }
+
+    private void OnDrawGizmos()
+    {
+        if(showCube)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(minCorner, 0.2f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(maxCorner, 0.2f);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireCube(maxCorner + (minCorner - maxCorner) * 0.5f, minCorner - maxCorner);
+        }
     }
 
     private void Update()

@@ -10,40 +10,14 @@ public class MergerTool_Component : MonoBehaviour
     [ReadOnly] [SerializeField] private float maximumDistanceToRoot;
     [ReadOnly] [SerializeField] private Material customMaterial;
     [ReadOnly] [SerializeField] private int prefabIndex;
-    [ReadOnly] [SerializeField] private bool isStatic = true;
+    [ReadOnly] [SerializeField] private bool isStatic = false;
 
     [ReadOnly] [SerializeField] public MeshRegistry meshRegistry;
 
     public bool wasAddedManually = true;
     [ReadOnly] [SerializeField] private List<Vector3> uvList;
 
-    private void OnEnable()
-    {
-    }
-
-    private void HandleNewPacket(string ID)
-    {
-        if(ID == this.ID)
-        { 
-            Debug.Log("Observer for ID '" + ID + "' in object '" + gameObject.name + "' triggered!");
-            ApplyDataPacket();
-            MergerTool.packetObserver -= HandleNewPacket;
-        }
-    }
-
-    private void ApplyDataPacket()
-    {
-        ConstructComponent(MergerTool.main.getData(ID, this));
-
-        //Load the new material here
-        if (null != customMaterial) { GetComponent<Renderer>().material = customMaterial; }
-
-        if (null != meshRegistry && isStatic)
-        {
-            //Debug.Log("Checking Nearest In: " + gameObject.name);
-            meshRegistry.MergeToRoot(gameObject, ID, prefabIndex, maximumDistanceToRoot);
-        }
-    }
+    //private int vertexLimit = 65536;
 
     private void Start()
     {
@@ -51,7 +25,7 @@ public class MergerTool_Component : MonoBehaviour
         if (MergerTool.main.hasData(ID)) { ApplyDataPacket(); }
         else
         {
-            Debug.Log("No data packet for ID '" + ID + "' observing if that changes!");
+            //Debug.Log("No data packet for ID '" + ID + "' observing if that changes!");
             MergerTool.packetObserver += HandleNewPacket;
         }
 
@@ -65,6 +39,25 @@ public class MergerTool_Component : MonoBehaviour
         //    //Debug.Log("Checking Nearest In: " + gameObject.name);
         //    meshRegistry.MergeToRoot(gameObject, ID, prefabIndex, maximumDistanceToRoot);
         //}
+    }
+
+    private void HandleNewPacket(string ID)
+    {
+        if(ID == this.ID)
+        { 
+            //Debug.Log("Observer for ID '" + ID + "' in object '" + gameObject.name + "' triggered!");
+            ApplyDataPacket();
+            MergerTool.packetObserver -= HandleNewPacket;
+        }
+    }
+
+    private void ApplyDataPacket()
+    {
+        ConstructComponent(MergerTool.main.getData(ID, this));
+
+        //Load the new material here
+        if (null != customMaterial) { GetComponent<Renderer>().material = customMaterial; }
+        MergeMesh();
     }
 
     public void ConstructComponent(DataPacket packet)
@@ -99,53 +92,56 @@ public class MergerTool_Component : MonoBehaviour
         GetComponent<MeshFilter>().mesh.SetUVs(0, uvList);
     }
 
-    public void MergeMesh()
+    //public void CombineMeshes()
+    //{
+    //    Vector3 originalPos = gameObject.transform.parent.position;
+    //    gameObject.transform.parent.position = Vector3.zero;
+
+    //    gameObject.transform.parent.GetComponent<MeshRenderer>().material = customMaterial;
+
+    //    MeshFilter[] meshFilters = gameObject.transform.parent.GetComponentsInChildren<MeshFilter>();
+    //    CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+
+    //    int i = 0;
+
+    //    while(i < meshFilters.Length)
+    //    {
+    //        combine[i].mesh = meshFilters[i].sharedMesh;
+    //        combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+    //        if (isStatic) { meshFilters[i].gameObject.SetActive(false); }
+    //        else if (!isStatic && i > 0) { meshFilters[i].GetComponent<MeshRenderer>().enabled = false; }
+    //        i++;
+    //    }
+
+    //    gameObject.transform.parent.GetComponent<MeshFilter>().mesh = new Mesh();
+    //    gameObject.transform.parent.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, true);
+
+    //    if(gameObject.transform.parent.GetComponent<MeshFilter>().mesh.vertexCount > vertexLimit) 
+    //    { throw new System.Exception("!!! ERROR: object '" + gameObject.transform.parent.name + "' has exceeded vertex limit on combined mesh, it's going to look really weird !!!"); }
+
+    //    if (isStatic) { gameObject.transform.parent.GetComponent<MeshCollider>().sharedMesh = gameObject.transform.parent.GetComponent<MeshFilter>().mesh; }
+
+    //    gameObject.transform.parent.gameObject.SetActive(true);
+
+    //    gameObject.transform.parent.position = originalPos;
+    //}
+
+    public void ReleaseMergedMesh()
     {
-        Vector3 originalPos = gameObject.transform.parent.position;
-        gameObject.transform.parent.position = Vector3.zero;
-
-        gameObject.transform.parent.GetComponent<MeshRenderer>().material = customMaterial;
-
-        MeshFilter[] meshFilters = gameObject.transform.parent.GetComponentsInChildren<MeshFilter>();
-        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
-
-        int i = 0;
-
-        while(i < meshFilters.Length)
-        {
-            combine[i].mesh = meshFilters[i].sharedMesh;
-            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
-            if (isStatic) { meshFilters[i].gameObject.SetActive(false); }
-            i++;
-        }
-
-        gameObject.transform.parent.GetComponent<MeshFilter>().mesh = new Mesh();
-        gameObject.transform.parent.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, isStatic); 
-
-        gameObject.transform.parent.gameObject.SetActive(true);
-
-        gameObject.transform.parent.position = originalPos;
+        Debug.Log("Called ReleaseMergedMesh on: " + gameObject.name);
+        meshRegistry.DetachFromRoot(gameObject, ID, prefabIndex, maximumDistanceToRoot);
     }
 
-    //public void UpdateMergeMesh()
-    //{
-    //    // FUTURE FEATURE TO ALLOW UPDATING THE PARENTED GROUPS OF NON-STATIC OBJECTS
-    //    // Started doing this but realized I'd probably be better of finishing up for a presentable alpha, if you're reading this please ignore this feature as of right now.
+    public void MergeMesh()
+    {
+        if (null != meshRegistry)
+        {
+            //Debug.Log("Checking Nearest In: " + gameObject.name);
+            meshRegistry.MergeToRoot(gameObject, ID, prefabIndex, maximumDistanceToRoot);
+        }
+    }
 
-    //    //if (null != meshRegistry && isStatic)
-    //    //{
-    //    //    //Debug.Log("Checking Nearest In: " + gameObject.name);
-    //    //    Node nearest = meshRegistry.getNearest(gameObject, ID, prefabIndex, maximumDistanceToRoot);
-
-    //    //    if(null == nearest)
-    //    //    {
-    //    //        Debug.Log("===== Updating Merge for: '" + gameObject.name + "' nearest returned null, assuming new Root established. =====");
-    //    //    }
-    //    //    else if(null != nearest)
-    //    //    {
-    //    //        GameObject oldParent = gameObject.transform.parent.gameObject;
-    //    //    }
-    //    //}
-    //}
+    public bool IsStatic {  get { return isStatic; } }
+    public Material CustomMaterial { get { return customMaterial; } }
 
 }
