@@ -65,14 +65,11 @@ public class MeshRegistry : MonoBehaviour
 
     }
 
-    private void AddNewSubGroup(GameObject obj)
-    {
-
-    }
-
     private void CombineMeshes(GameObject obj, bool isStatic, Material customMaterial)
     {
         if(!CheckCanCombine(obj)) { return; }
+
+        MeshFilter parentFilter = obj.transform.parent.GetComponent<MeshFilter>();
 
         Vector3 originalPos = obj.transform.parent.position;
         obj.transform.parent.position = Vector3.zero;
@@ -89,7 +86,7 @@ public class MeshRegistry : MonoBehaviour
             if(meshFilters[i].gameObject == obj.transform.parent) { }
             else
             {
-                if (!isStatic) { obj.transform.parent.GetComponent<MeshFilter>().mesh.Clear(); }
+                if (!isStatic) { parentFilter.mesh.Clear(); }
                 combine[i].mesh = meshFilters[i].sharedMesh;
                 combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
                 if (isStatic) { meshFilters[i].gameObject.SetActive(false); }
@@ -98,13 +95,13 @@ public class MeshRegistry : MonoBehaviour
             i++;
         }
 
-        obj.transform.parent.GetComponent<MeshFilter>().mesh = new Mesh();
-        obj.transform.parent.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, true);
+        parentFilter.mesh = new Mesh();
+        parentFilter.mesh.CombineMeshes(combine, true);
 
-        if (obj.transform.parent.GetComponent<MeshFilter>().mesh.vertexCount > vertexLimit)
+        if (parentFilter.mesh.vertexCount > vertexLimit)
         { throw new System.Exception("!!! ERROR: object '" + obj.transform.parent.name + "' has exceeded vertex limit on combined mesh, it's going to look really weird !!!"); }
 
-        if (isStatic) { obj.transform.parent.GetComponent<MeshCollider>().sharedMesh = obj.transform.parent.GetComponent<MeshFilter>().mesh; }
+        if (isStatic) { parentFilter.sharedMesh = parentFilter.mesh; }
 
         obj.transform.parent.gameObject.SetActive(true);
 
@@ -142,9 +139,11 @@ public class MeshRegistry : MonoBehaviour
 
         if(nearestFound.transform.parent.childCount > 0)
         {
-            CombineMeshes(nearestFound.transform.GetChild(0).gameObject,
-                          nearestFound.transform.GetChild(0).GetComponent<MergerTool_Component>().IsStatic,
-                          nearestFound.transform.GetChild(0).GetComponent<MergerTool_Component>().CustomMaterial);
+            Transform childTransform = nearestFound.transform.GetChild(0);
+
+            CombineMeshes(childTransform.gameObject,
+                          childTransform.GetComponent<MergerTool_Component>().IsStatic,
+                          childTransform.GetComponent<MergerTool_Component>().CustomMaterial);
         }
         //nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CombineMeshes();
 

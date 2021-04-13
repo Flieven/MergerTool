@@ -35,6 +35,8 @@ public class Node
         parentObj.transform.position = pos;
 
         depth = currentDepth;
+
+        parentObj.isStatic = objRef.isStatic;
     }
 }
 
@@ -57,8 +59,11 @@ public class KDTree
         newSubgroupObject.AddComponent<MeshFilter>();
         newSubgroupObject.AddComponent<MeshRenderer>();
 
-        if (obj.GetComponent<MergerTool_Component>().IsStatic)
-        { newSubgroupObject.AddComponent<MeshCollider>(); }
+        if (obj.isStatic)
+        {
+            newSubgroupObject.isStatic = obj.isStatic;
+            newSubgroupObject.AddComponent<MeshCollider>(); 
+        }
 
         newSubgroupObject.GetComponent<MeshFilter>().mesh = new Mesh();
         current.numSubGroups++;

@@ -17,18 +17,9 @@ public class MergerTool_Component : MonoBehaviour
     public bool wasAddedManually = true;
     [ReadOnly] [SerializeField] private List<Vector3> uvList;
 
-    //private int vertexLimit = 65536;
-
     private void Start()
     {
-
-        if (MergerTool.main.hasData(ID)) { ApplyDataPacket(); }
-        else
-        {
-            //Debug.Log("No data packet for ID '" + ID + "' observing if that changes!");
-            MergerTool.packetObserver += HandleNewPacket;
-        }
-
+        InitializeComponent();
         //ConstructComponent(MergerTool.main.getData(ID, this));
 
         ////Load the new material here
@@ -39,6 +30,17 @@ public class MergerTool_Component : MonoBehaviour
         //    //Debug.Log("Checking Nearest In: " + gameObject.name);
         //    meshRegistry.MergeToRoot(gameObject, ID, prefabIndex, maximumDistanceToRoot);
         //}
+    }
+
+    private void InitializeComponent()
+    {
+        if (MergerTool.main.hasData(ID))
+        { ApplyDataPacket(); }
+        else
+        {
+            //Debug.Log("No data packet for ID '" + ID + "' observing if that changes!");
+            MergerTool.packetObserver += HandleNewPacket;
+        }
     }
 
     private void HandleNewPacket(string ID)
@@ -69,6 +71,7 @@ public class MergerTool_Component : MonoBehaviour
                 prefabIndex = i;
                 maximumDistanceToRoot = packet.prefabs[i].maximumDistanceToRoot;
                 isStatic = packet.prefabs[i].isStatic;
+                if(isStatic) { gameObject.isStatic = this.isStatic; }
             }
         }
         customMaterial = packet.mergedMaterial;
@@ -84,12 +87,14 @@ public class MergerTool_Component : MonoBehaviour
     {
         uvList = new List<Vector3>();
 
-        for (int i = 0; i < GetComponent<MeshFilter>().sharedMesh.uv.Length; i++)
+        MeshFilter meshFilterComp = GetComponent<MeshFilter>();
+
+        for (int i = 0; i < meshFilterComp.sharedMesh.uv.Length; i++)
         {
-            uvList.Add(new Vector3(GetComponent<MeshFilter>().sharedMesh.uv[i].x,
-                                   GetComponent<MeshFilter>().sharedMesh.uv[i].y, prefabIndex));
+            uvList.Add(new Vector3(meshFilterComp.sharedMesh.uv[i].x,
+                                   meshFilterComp.sharedMesh.uv[i].y, prefabIndex));
         }
-        GetComponent<MeshFilter>().mesh.SetUVs(0, uvList);
+        meshFilterComp.mesh.SetUVs(0, uvList);
     }
 
     //public void CombineMeshes()

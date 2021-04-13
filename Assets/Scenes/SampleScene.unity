@@ -321,13 +321,13 @@ MonoBehaviour:
   spawnArray:
   - objectToSpawn: {fileID: 1087232998764721991, guid: 329362990c851d845872da015db786a5,
       type: 3}
-    numObjectsToSpawn: 33
+    numObjectsToSpawn: 1000
   - objectToSpawn: {fileID: 2256349168775237284, guid: 9ac555ec78a772a48abd902166683c1f,
       type: 3}
-    numObjectsToSpawn: 33
+    numObjectsToSpawn: 1000
   - objectToSpawn: {fileID: 2873500436656626182, guid: 99b82556e0eaf674abeff9dd61c26d75,
       type: 3}
-    numObjectsToSpawn: 33
+    numObjectsToSpawn: 1000
   - objectToSpawn: {fileID: 2683119798344971435, guid: 1cd26ffe732045b42a92a97e65c5e649,
       type: 3}
     numObjectsToSpawn: 0
