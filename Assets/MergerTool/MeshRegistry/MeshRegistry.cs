@@ -52,8 +52,22 @@ public class MeshRegistry : MonoBehaviour
         }
     }
 
+    private bool CheckCanCombine(GameObject obj)
+    {
+        int currentTotalVertexCount = obj.transform.parent.GetComponent<MeshFilter>().mesh.vertexCount;
+        int currentObjVertexCount = obj.GetComponent<MeshFilter>().mesh.vertexCount;
+
+        Debug.Log("Total Vertex of '" + obj.name + "'(" + currentObjVertexCount +") in '"+ obj.transform.parent.name +"'("+currentTotalVertexCount+") should be: " + (currentObjVertexCount + currentTotalVertexCount));
+
+        if(currentObjVertexCount + currentTotalVertexCount < vertexLimit) { return true; }
+        else { return false; }
+
+    }
+
     private void CombineMeshes(GameObject obj, bool isStatic, Material customMaterial)
     {
+        if(!CheckCanCombine(obj)) { return; }
+
         Vector3 originalPos = obj.transform.parent.position;
         obj.transform.parent.position = Vector3.zero;
 
@@ -66,10 +80,15 @@ public class MeshRegistry : MonoBehaviour
 
         while (i < meshFilters.Length)
         {
-            combine[i].mesh = meshFilters[i].sharedMesh;
-            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
-            if (isStatic) { meshFilters[i].gameObject.SetActive(false); }
-            else if (!isStatic && i > 0) { meshFilters[i].GetComponent<MeshRenderer>().enabled = false; }
+            if(meshFilters[i].gameObject == obj.transform.parent) { }
+            else
+            {
+                if (!isStatic) { obj.transform.parent.GetComponent<MeshFilter>().mesh.Clear(); }
+                combine[i].mesh = meshFilters[i].sharedMesh;
+                combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+                if (isStatic) { meshFilters[i].gameObject.SetActive(false); }
+                else if (!isStatic && i > 0) { meshFilters[i].GetComponent<MeshRenderer>().enabled = false; }
+            }
             i++;
         }
 
