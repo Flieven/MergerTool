@@ -2,25 +2,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class SubGroup
+{
+    public GameObject subGroupParent = null;
+    public int totalVerteciesInSubGroup = 0;
+
+    public SubGroup(GameObject parentObj, int vertecies)
+    {
+        subGroupParent = parentObj;
+        totalVerteciesInSubGroup = vertecies;
+    }
+}
+
 public class Node
 {
     public int depth = 0;
     public Vector3 pos = Vector3.zero;
     public GameObject parentObj = null;
+    public List<SubGroup> subGroups = new List<SubGroup>();
     public Node lesser, greater;
+
+    public int numSubGroups = 0;
+    public int currentAvailableSubGroup = 0;
 
     public Node(GameObject objRef, int currentDepth, int num)
     {
         parentObj = new GameObject();
-        parentObj.AddComponent<MeshFilter>();
-        parentObj.AddComponent<MeshRenderer>();
 
-        if (objRef.GetComponent<MergerTool_Component>().IsStatic)
-        { parentObj.AddComponent<MeshCollider>(); }
-
-        parentObj.GetComponent<MeshFilter>().mesh = new Mesh();
-
-        parentObj.name = "RootObject " + objRef.GetComponent<MeshFilter>().sharedMesh.name + num;
+        parentObj.name = "RootObject " + objRef.GetComponent<MeshFilter>().sharedMesh.name + " " + num;
 
         pos = objRef.transform.position;
         parentObj.transform.position = pos;
@@ -37,6 +46,42 @@ public class KDTree
 
     private List<Node> proximityNodes = new List<Node>();
 
+    private int vertexLimit = 65536;
+
+    public void AddNewSubGroup(Node current, GameObject obj)
+    {
+        GameObject newSubgroupObject = new GameObject();
+        newSubgroupObject.name = "SubGroup " + current.numSubGroups;
+        newSubgroupObject.transform.position = current.pos;
+        newSubgroupObject.transform.SetParent(current.parentObj.transform);
+        newSubgroupObject.AddComponent<MeshFilter>();
+        newSubgroupObject.AddComponent<MeshRenderer>();
+
+        if (obj.GetComponent<MergerTool_Component>().IsStatic)
+        { newSubgroupObject.AddComponent<MeshCollider>(); }
+
+        newSubgroupObject.GetComponent<MeshFilter>().mesh = new Mesh();
+        current.numSubGroups++;
+
+        current.subGroups.Add(new SubGroup(newSubgroupObject,0));
+        CheckSubGroups(current, obj);
+    }
+
+    public void CheckSubGroups(Node current, GameObject obj)
+    {
+        if(current.subGroups[current.currentAvailableSubGroup].totalVerteciesInSubGroup + obj.GetComponent<MeshFilter>().mesh.vertexCount < vertexLimit)
+        {
+            obj.transform.SetParent(current.subGroups[current.currentAvailableSubGroup].subGroupParent.transform);
+            current.subGroups[current.currentAvailableSubGroup].totalVerteciesInSubGroup += obj.GetComponent<MeshFilter>().mesh.vertexCount;
+            Debug.Log("Adding '" + obj.name + "' to subGroup of Node '" + current.parentObj.name + "' vertex count (" + current.subGroups[current.currentAvailableSubGroup].totalVerteciesInSubGroup + ")");
+        }
+        else 
+        {
+            current.currentAvailableSubGroup++;
+            AddNewSubGroup(current, obj); 
+        }
+    }
+
     public void AddNewNode(Node nearest, GameObject obj)
     {
         Node newNode = null;
@@ -45,7 +90,7 @@ public class KDTree
             newNode = new Node(obj, 0, num);
             num++;
             root = newNode;
-            obj.transform.SetParent(root.parentObj.transform);
+            AddNewSubGroup(root, obj);
             return;
         }
 
@@ -53,7 +98,8 @@ public class KDTree
         {
             newNode = new Node(obj, nearest.depth++, num);
             num++;
-            obj.transform.SetParent(newNode.parentObj.transform);
+            AddNewSubGroup(newNode, obj);
+            //obj.transform.SetParent(newNode.parentObj.transform);
 
             if (nearest.depth % kDepth == 0)
             {

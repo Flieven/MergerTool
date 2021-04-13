@@ -37,11 +37,12 @@ public class MeshRegistry : MonoBehaviour
         Node nearestFound = posDictionary[ID][prefabIndex].Nearest(posDictionary[ID][prefabIndex].getRoot, obj.transform.position, null, 0, fastSearch);
 
         if(Vector3.Distance(nearestFound.pos, obj.transform.position) <= maxDistance)
-        { 
+        {
             //Debug.Log("===== Found Nearest: '" + nearestFound.obj.name + "' Within minimumDistance To '" + obj.name + "' =====");
-            
+
             // PARENT/MERGE THE OBJECTS HERE
-            obj.transform.SetParent(nearestFound.parentObj.transform);
+            posDictionary[ID][prefabIndex].CheckSubGroups(nearestFound, obj);
+            //obj.transform.SetParent(nearestFound.parentObj.transform);
             //nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CombineMeshes();
             CombineMeshes(obj, obj.GetComponent<MergerTool_Component>().IsStatic, obj.GetComponent<MergerTool_Component>().CustomMaterial);
         }
@@ -57,10 +58,15 @@ public class MeshRegistry : MonoBehaviour
         int currentTotalVertexCount = obj.transform.parent.GetComponent<MeshFilter>().mesh.vertexCount;
         int currentObjVertexCount = obj.GetComponent<MeshFilter>().mesh.vertexCount;
 
-        Debug.Log("Total Vertex of '" + obj.name + "'(" + currentObjVertexCount +") in '"+ obj.transform.parent.name +"'("+currentTotalVertexCount+") should be: " + (currentObjVertexCount + currentTotalVertexCount));
+        //Debug.Log("Total Vertex of '" + obj.name + "'(" + currentObjVertexCount +") in '"+ obj.transform.parent.name +"'("+currentTotalVertexCount+") should be: " + (currentObjVertexCount + currentTotalVertexCount));
 
         if(currentObjVertexCount + currentTotalVertexCount < vertexLimit) { return true; }
         else { return false; }
+
+    }
+
+    private void AddNewSubGroup(GameObject obj)
+    {
 
     }
 
@@ -108,33 +114,37 @@ public class MeshRegistry : MonoBehaviour
     public void DetachFromRoot(GameObject obj, string ID, int prefabIndex, float maxDistance)
     {
 
-        Node nearestFound = null;
+        GameObject nearestFound = null;
         List<Node> proximityNodes = posDictionary[ID][prefabIndex].AllNodesInProximity(posDictionary[ID][prefabIndex].getRoot, obj.transform.position, 0, fastSearch, maxDistance);
         foreach(Node node in proximityNodes)
         {
-            if(node.parentObj.transform.Find(obj.name)) { nearestFound = node; }
+            for (int i = 0; i < node.subGroups.Count; i++)
+            {
+                if(node.subGroups[i].subGroupParent.transform.Find(obj.name)) { nearestFound = node.subGroups[i].subGroupParent; }
+            }
+            //if(node.parentObj.transform.Find(obj.name)) { nearestFound = node; }
         }
 
         if(null == nearestFound)
         {
-            Debug.Log("!!! ERROR: Could not find object: '" + obj.name + "' in '" + nearestFound.parentObj.name + "' in KD tree !!!");
+            Debug.Log("!!! ERROR: Could not find object: '" + obj.name + "' in '" + nearestFound.transform.parent.name + "' in KD tree !!!");
             Debug.Log("List of objects searched: ");
-            foreach (Transform child in nearestFound.parentObj.transform)
+            foreach (Transform child in nearestFound.transform.parent.transform)
             { Debug.Log(child.gameObject.name); }
         }
 
-        Debug.Log("<<< Found object: '" + obj.name + "' in '" + nearestFound.parentObj.name + "' in KD tree >>>");
+        Debug.Log("<<< Found object: '" + obj.name + "' in '" + nearestFound.transform.parent.name + "' in KD tree >>>");
         obj.transform.parent = null;
         obj.GetComponent<MeshRenderer>().enabled = true;
 
-        nearestFound.parentObj.GetComponent<MeshFilter>().mesh.Clear();
-        nearestFound.parentObj.GetComponent<MeshFilter>().mesh = null;
+        nearestFound.transform.GetComponent<MeshFilter>().mesh.Clear();
+        nearestFound.transform.GetComponent<MeshFilter>().mesh = null;
 
-        if(nearestFound.parentObj.transform.childCount > 0)
+        if(nearestFound.transform.parent.childCount > 0)
         {
-            CombineMeshes(nearestFound.parentObj.transform.GetChild(0).gameObject,
-                          nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().IsStatic,
-                          nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CustomMaterial);
+            CombineMeshes(nearestFound.transform.GetChild(0).gameObject,
+                          nearestFound.transform.GetChild(0).GetComponent<MergerTool_Component>().IsStatic,
+                          nearestFound.transform.GetChild(0).GetComponent<MergerTool_Component>().CustomMaterial);
         }
         //nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CombineMeshes();
 
