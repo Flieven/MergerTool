@@ -9,13 +9,18 @@ public struct PrefabStruct
     [SerializeField] public GameObject prefab;
     [SerializeField] public float maximumDistanceToRoot;
     [SerializeField] public bool isStatic;
+    [ReadOnly] [SerializeField] public Mesh prefabMesh;
 
     public PrefabStruct(GameObject prefab, float maxDistanceToRoot, bool isStatic)
     {
         this.prefab = prefab;
         maximumDistanceToRoot = maxDistanceToRoot;
         this.isStatic = isStatic;
+        prefabMesh = prefab.GetComponent<MeshFilter>().sharedMesh;
     }
+
+    public void InitializeMesh()
+    { prefabMesh = prefab.GetComponent<MeshFilter>().sharedMesh; }
 }
 
 [System.Serializable]
@@ -108,6 +113,9 @@ public class MergerTool : MonoBehaviour
 
     private void PopulateDataSet(int index)
     {
+        for (int i = 0; i < dataPackets[index].prefabs.Length; i++)
+        { dataPackets[index].prefabs[i].InitializeMesh(); }
+
         dataPackets[index].textureSize.x = dataPackets[index].prefabs[0].prefab.GetComponent<Renderer>().sharedMaterial.mainTexture.width;
         dataPackets[index].textureSize.y = dataPackets[index].prefabs[0].prefab.GetComponent<Renderer>().sharedMaterial.mainTexture.height;
         dataPackets[index].textureRegistry.registrySize = dataPackets[index].prefabs.Length;
@@ -117,13 +125,27 @@ public class MergerTool : MonoBehaviour
         else { Debug.Log("packetObserver was null, no items subscribed."); }
     }
 
-    public DataPacket getData(string ID, MergerTool_Component component)
+    public DataPacket getData(string ID, Mesh mesh, out int meshIndex, out MeshRegistry meshRegistry)
     {
-        component.meshRegistry = this.meshRegistry;
+        meshRegistry = this.meshRegistry;
+        int foundMeshIndex = 0;
 
         for (int i = 0; i < dataPackets.Count; i++)
         {
-            if (dataPackets[i].ID == ID) { return dataPackets[i]; }
+            if (dataPackets[i].ID == ID) 
+            {
+                for(int ii = 0; ii < dataPackets[i].prefabs.Length; ii++)
+                { 
+                    if(dataPackets[i].prefabs[ii].prefabMesh == mesh)
+                    {
+                        foundMeshIndex = ii;
+                        break;
+                    }
+                }
+
+                meshIndex = foundMeshIndex;
+                return dataPackets[i];
+            }
         }
         throw new System.Exception("!!! ERROR: No Datapacket with ID: '" + ID + "' Found !!!");
     }

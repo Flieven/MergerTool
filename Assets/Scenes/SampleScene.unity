@@ -317,20 +317,24 @@ MonoBehaviour:
   showCube: 1
   minCorner: {x: -6, y: -6, z: -6}
   maxCorner: {x: 5, y: 5, z: 5}
-  randomizedSpawn: 0
+  randomizedSpawn: 1
   spawnArray:
   - objectToSpawn: {fileID: 1087232998764721991, guid: 329362990c851d845872da015db786a5,
       type: 3}
-    numObjectsToSpawn: 1000
+    numObjectsToSpawn: 33
+    totalNumSpawnedObjects: 0
   - objectToSpawn: {fileID: 2256349168775237284, guid: 9ac555ec78a772a48abd902166683c1f,
       type: 3}
-    numObjectsToSpawn: 1000
+    numObjectsToSpawn: 33
+    totalNumSpawnedObjects: 0
   - objectToSpawn: {fileID: 2873500436656626182, guid: 99b82556e0eaf674abeff9dd61c26d75,
       type: 3}
-    numObjectsToSpawn: 1000
+    numObjectsToSpawn: 33
+    totalNumSpawnedObjects: 0
   - objectToSpawn: {fileID: 2683119798344971435, guid: 1cd26ffe732045b42a92a97e65c5e649,
       type: 3}
     numObjectsToSpawn: 0
+    totalNumSpawnedObjects: 0
 --- !u!4 &709872263
 Transform:
   m_ObjectHideFlags: 0
@@ -704,14 +708,17 @@ MonoBehaviour:
         type: 3}
       maximumDistanceToRoot: 15
       isStatic: 0
+      prefabMesh: {fileID: 0}
     - prefab: {fileID: 2873500436656626182, guid: 99b82556e0eaf674abeff9dd61c26d75,
         type: 3}
       maximumDistanceToRoot: 10
       isStatic: 0
+      prefabMesh: {fileID: 0}
     - prefab: {fileID: 2256349168775237284, guid: 9ac555ec78a772a48abd902166683c1f,
         type: 3}
       maximumDistanceToRoot: 23
       isStatic: 1
+      prefabMesh: {fileID: 0}
     textureRegistry:
       registrySize: 0
       diffuse:
@@ -731,10 +738,11 @@ MonoBehaviour:
     - prefab: {fileID: 453003638}
       maximumDistanceToRoot: 10
       isStatic: 1
-    - prefab: {fileID: 2683119798344971435, guid: 1cd26ffe732045b42a92a97e65c5e649,
-        type: 3}
+      prefabMesh: {fileID: 0}
+    - prefab: {fileID: 2129498080}
       maximumDistanceToRoot: 33
       isStatic: 1
+      prefabMesh: {fileID: 0}
     textureRegistry:
       registrySize: 0
       diffuse:

@@ -7,6 +7,7 @@ public struct SpawnSets
 {
     public GameObject objectToSpawn;
     public int numObjectsToSpawn;
+    [ReadOnly] public int totalNumSpawnedObjects;
 }
 
 public class Testing_Spawner : MonoBehaviour
@@ -16,11 +17,9 @@ public class Testing_Spawner : MonoBehaviour
     [SerializeField] private Vector3 maxCorner = Vector3.zero;
     [Space]
     [SerializeField] private bool randomizedSpawn = true;
+    [Space]
     [SerializeField] private SpawnSets[] spawnArray = null;
 
-    private void Awake()
-    {
-    }
 
     private void MakeNewPacket()
     {
@@ -38,6 +37,11 @@ public class Testing_Spawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        SpawnObjects();
+    }
+
+    private void SpawnObjects()
+    {
         for (int i = 0; i < spawnArray.Length; i++)
         {
             for (int ii = 0; ii < spawnArray[i].numObjectsToSpawn; ii++)
@@ -50,7 +54,7 @@ public class Testing_Spawner : MonoBehaviour
                 {
 
                     newObj = Instantiate(newRandomObj,
-                        new Vector3(ii * 2, i * 2, 0), Quaternion.identity);
+                        new Vector3((ii * 2) + (spawnArray[i].totalNumSpawnedObjects * 2), i * 2, 0), Quaternion.identity);
                     //MergerTool.main.Add_MergeToolComponent(newObj, "CodePacket");
                     //if (i == 2)
                     //{
@@ -66,12 +70,12 @@ public class Testing_Spawner : MonoBehaviour
                                          Random.rotation);
                 }
 
-                newObj.name = newRandomObj.name + " " + ii;
+                newObj.name = newRandomObj.name + " " + (ii + spawnArray[i].totalNumSpawnedObjects);
+
+                if(ii >= spawnArray[i].numObjectsToSpawn -1) { spawnArray[i].totalNumSpawnedObjects += spawnArray[i].numObjectsToSpawn; }
             }
         }
-
-       // if (null != MergerTool.main) { MakeNewPacket(); }
-
+        // if (null != MergerTool.main) { MakeNewPacket(); }
     }
 
     private void OnDrawGizmos()
@@ -92,6 +96,11 @@ public class Testing_Spawner : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.H))
         {
             if (null != MergerTool.main) { MakeNewPacket(); }
+        }
+
+        if(Input.GetKeyDown(KeyCode.I))
+        {
+            SpawnObjects();
         }
     }
 }

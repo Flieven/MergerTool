@@ -102,9 +102,11 @@ public class DataPacket_Drawer : PropertyDrawer
             {
                 Rect DistanceRect = new Rect(position.x + position.width * 0.5f, position.y + position.height + (i * (position.height)), position.width - position.width * 0.52f, position.height);
                 Rect StaticRect = new Rect(position.x + position.width * 0.5f, position.y + (i * (position.height)), position.width - position.width * 0.52f, position.height);
-                Rect ObjectRect = new Rect(position.x, position.y + ( i * (position.height)), position.width * 0.5f, position.height * 2.0f);
+                Rect ObjectRect = new Rect(position.x, position.y + ( i * (position.height)), position.width * 0.5f, position.height);
+                Rect MeshRect = new Rect(position.x, position.y + position.height + (i * (position.height)), position.width * 0.5f, position.height);
 
                 EditorGUI.PropertyField(ObjectRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("prefab"), GUIContent.none);
+                EditorGUI.PropertyField(MeshRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("prefabMesh"), GUIContent.none);
                 position.y += position.height + EditorGUIUtility.standardVerticalSpacing;
                 EditorGUI.PropertyField(StaticRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("isStatic"), new GUIContent("Is Static", "Is the object static in the world?\nIf false objects can be interacted with at individual level.\nNOTE: Do not call 'ReleaseFromRoot' on static objects!."));
                 EditorGUI.PropertyField(DistanceRect, property.GetArrayElementAtIndex(i).FindPropertyRelative("maximumDistanceToRoot"), new GUIContent("Max Distance To Root", "Maximum distance object can have from a mergeable Root object"));

@@ -18,6 +18,7 @@ public class Node
 {
     public int depth = 0;
     public Vector3 pos = Vector3.zero;
+    public Node parentNode = null;
     public GameObject parentObj = null;
     public List<SubGroup> subGroups = new List<SubGroup>();
     public Node lesser, greater;
@@ -37,6 +38,24 @@ public class Node
         depth = currentDepth;
 
         parentObj.isStatic = objRef.isStatic;
+    }
+
+    public void NullifyNode(Node current)
+    {
+        Debug.Log("Calling Node nullification in node '" + parentObj.name + "'");
+        if(greater == current) { greater = null; /*Debug.Log("Greater nulled");*/ }
+        else if (lesser == current) { lesser = null; /*Debug.Log("Lesser nulled");*/ }
+        else { throw new System.Exception("!!! ERROR: We were given a node that does not exists within this parent node? !!!"); }
+    }
+
+    ~Node()
+    {
+        Debug.Log("~~~ Destructor was called on a Node ~~~");
+        depth = 0;
+        pos = Vector3.zero;
+        subGroups.Clear();
+        numSubGroups = 0;
+        currentAvailableSubGroup = 0;
     }
 }
 
@@ -78,7 +97,7 @@ public class KDTree
         {
             obj.transform.SetParent(current.subGroups[current.currentAvailableSubGroup].subGroupParent.transform);
             current.subGroups[current.currentAvailableSubGroup].totalVerteciesInSubGroup += obj.GetComponent<MeshFilter>().mesh.vertexCount;
-            Debug.Log("Adding '" + obj.name + "' to subGroup of Node '" + current.parentObj.name + "' vertex count (" + current.subGroups[current.currentAvailableSubGroup].totalVerteciesInSubGroup + ")");
+            //Debug.Log("Adding '" + obj.name + "' to subGroup of Node '" + current.parentObj.name + "' vertex count (" + current.subGroups[current.currentAvailableSubGroup].totalVerteciesInSubGroup + ")");
         }
         else 
         {
@@ -102,6 +121,7 @@ public class KDTree
         if(null != nearest)
         {
             newNode = new Node(obj, nearest.depth++, num);
+            newNode.parentNode = nearest;
             num++;
             AddNewSubGroup(newNode, obj);
             //obj.transform.SetParent(newNode.parentObj.transform);
@@ -127,6 +147,122 @@ public class KDTree
 
     }
 
+    public void RemoveSubGroup(Node current, GameObject subGroupParent)
+    {
+        for (int i = 0; i < current.subGroups.Count; i++)
+        {
+            if (current.subGroups[i].subGroupParent == subGroupParent)
+            {
+                Debug.Log("Removing: " + subGroupParent.name + " at index (" + i + ")");
+                current.subGroups.RemoveAt(i);
+                Debug.Log("New list size: " + current.subGroups.Count);
+                break;
+            }
+        }
+
+        if (current.subGroups.Count <= 0)
+        { CheckRebuildKDTree(current); }
+    }
+
+    private void CheckRebuildKDTree(Node current)
+    {
+        if (null == current.greater && null == current.lesser)
+        {
+            Object.Destroy(current.parentObj);
+            current.parentNode.NullifyNode(current);
+            num--;
+            return;
+        }
+        
+        if (null != current.greater)
+        {
+            //Find new position for greater
+
+            //TODO:
+            /*
+             * Go down the KD tree checking lesser/greater against our pos until a null point is found.
+             * Apply our node to that null point.
+             */
+            if(null != current.parentObj) 
+            { 
+                Object.Destroy(current.parentObj);
+                current.parentNode.NullifyNode(current);
+            }
+            FindLeaf(root, current.greater, 0);
+
+        }
+
+        if (null != current.lesser)
+        {
+            //Find new position for lesser
+
+            //TODO:
+            /*
+             * Go down the KD tree checking lesser/greater against our pos until a null point is found.
+             * Apply our node to that null point.
+             */
+            if (null != current.parentObj)
+            {
+                Object.Destroy(current.parentObj);
+                current.parentNode.NullifyNode(current);
+            }
+            FindLeaf(root, current.lesser, 0);
+        }
+    }
+
+    private void FindLeaf(Node currentBranch, Node newLeaf, int depth)
+    {
+        int currentDepth = depth;
+        if (CheckLesser(currentBranch, newLeaf.pos, depth))
+        {
+            if(null != currentBranch.lesser) { FindLeaf(currentBranch.lesser, newLeaf, currentDepth); }
+            else 
+            { 
+                Debug.Log("=== '" + newLeaf.parentObj.name + "' new parentNode = '" + currentBranch.parentObj.name + "' ===");
+                currentBranch.lesser = newLeaf; 
+            }
+        }
+        else
+        {
+            if (null != currentBranch.greater) { FindLeaf(currentBranch.greater, newLeaf, currentDepth); }
+            else 
+            {
+                {
+                    Debug.Log("=== '" + newLeaf.parentObj.name + "' new parentNode = '" + currentBranch.parentObj.name + "' ===");
+                    currentBranch.greater = newLeaf;
+                }
+            }
+        }
+    }
+
+    private bool CheckLesser(Node current, Vector3 goal, int currentDepth)
+    {
+
+        if (currentDepth % kDepth == 0)
+        {
+            if (goal.x < current.pos.x)
+            { return true; }
+            else
+            { return false; }
+        }
+        else if (currentDepth % kDepth == 1)
+        {
+            if (goal.y < current.pos.y)
+            { return true; }
+            else
+            { return false; }
+        }
+        else if (currentDepth % kDepth == 2)
+        {
+            if (goal.z < current.pos.z)
+            { return true; }
+            else
+            { return false; }
+        }
+        else
+        { throw new System.Exception("!!! ERROR: currentDepth % kDepth Gave Unexpected Return: '" + currentDepth % kDepth + "' !!!"); }
+    }
+
     public Node Nearest(Node current, Vector3 goal, Node currentBest, int depth, bool fastSearch)
     {
         //if(null != current) { Debug.Log("Called Nearest with root: " + current.parentObj.name); }
@@ -145,47 +281,7 @@ public class KDTree
         }
         else { currentBest = current; }
 
-        if(currentDepth%kDepth == 0)
-        {
-            if(goal.x < current.pos.x)
-            {
-                goodSide = current.lesser;
-                badSide = current.greater;
-            }
-            else
-            {
-                goodSide = current.greater;
-                badSide = current.lesser;
-            }
-        }
-        else if(currentDepth % kDepth == 1)
-        {
-            if (goal.y < current.pos.y)
-            {
-                goodSide = current.lesser;
-                badSide = current.greater;
-            }
-            else
-            {
-                goodSide = current.greater;
-                badSide = current.lesser;
-            }
-        }
-        else if(currentDepth % kDepth == 2)
-        {
-            if (goal.z < current.pos.z)
-            {
-                goodSide = current.lesser;
-                badSide = current.greater;
-            }
-            else
-            {
-                goodSide = current.greater;
-                badSide = current.lesser;
-            }
-        }
-        else
-        { throw new System.Exception("!!! ERROR: currentDepth % kDepth Gave Unexpected Return: '" + currentDepth % kDepth + "' !!!"); }
+        LookupDepth(goal, currentDepth, current, out goodSide, out badSide);
 
         currentBest = Nearest(goodSide, goal, currentBest, depth++, fastSearch);
 
@@ -197,23 +293,8 @@ public class KDTree
 
     }
 
-    public List<Node> AllNodesInProximity(Node current, Vector3 goal, int depth, bool fastSearch, float maxDistance)
+    private void LookupDepth(Vector3 goal, int currentDepth, Node current, out Node goodSide, out Node badSide)
     {
-        Node goodSide;
-        Node badSide;
-
-        int currentDepth = depth;
-
-        if (null != current) { Debug.Log("Called Proximity with root: " + current.parentObj.name); }
-
-        if (current == root) { proximityNodes.Clear(); }
-
-        if(Vector3.Distance(current.pos, goal) <= maxDistance) 
-        { 
-            proximityNodes.Add(current);
-            Debug.Log("Added " + current.parentObj.name + " to list of proximity nodes!");
-        }
-
         if (currentDepth % kDepth == 0)
         {
             if (goal.x < current.pos.x)
@@ -255,8 +336,28 @@ public class KDTree
         }
         else
         { throw new System.Exception("!!! ERROR: currentDepth % kDepth Gave Unexpected Return: '" + currentDepth % kDepth + "' !!!"); }
+    }
 
-        if(null != goodSide)
+    public List<Node> AllNodesInProximity(Node current, Vector3 goal, int depth, bool fastSearch, float maxDistance)
+    {
+        Node goodSide;
+        Node badSide;
+
+        int currentDepth = depth;
+
+        if (null != current) { Debug.Log("Called Proximity with root: " + current.parentObj.name); }
+
+        if (current == root) { proximityNodes.Clear(); }
+
+        if(Vector3.Distance(current.pos, goal) <= maxDistance) 
+        { 
+            proximityNodes.Add(current);
+            Debug.Log("Added " + current.parentObj.name + " to list of proximity nodes!");
+        }
+
+        LookupDepth(goal, currentDepth, current, out goodSide, out badSide);
+
+        if (null != goodSide)
         { AllNodesInProximity(goodSide, goal, depth++, fastSearch, maxDistance); }
 
         //Having this will check the entire Tree BUT it will be slower because of it!

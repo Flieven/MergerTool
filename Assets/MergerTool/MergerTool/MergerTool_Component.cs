@@ -1,6 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Jobs;
 using UnityEngine;
+
+public struct InitializationJob : IJob
+{
+    public void Execute()
+    {
+
+    }
+}
 
 [AddComponentMenu("MergerTool/MergerTool Component")]
 public class MergerTool_Component : MonoBehaviour
@@ -17,9 +26,19 @@ public class MergerTool_Component : MonoBehaviour
     public bool wasAddedManually = true;
     [ReadOnly] [SerializeField] private List<Vector3> uvList;
 
+    private Mesh myMesh = null;
+    private Material myMaterial = null;
+
+    private void Awake()
+    {
+        myMesh = gameObject.GetComponent<MeshFilter>().sharedMesh;
+        myMaterial = GetComponent<Renderer>().material;
+    }
+
     private void Start()
     {
         InitializeComponent();
+
         //ConstructComponent(MergerTool.main.getData(ID, this));
 
         ////Load the new material here
@@ -55,25 +74,20 @@ public class MergerTool_Component : MonoBehaviour
 
     private void ApplyDataPacket()
     {
-        ConstructComponent(MergerTool.main.getData(ID, this));
+        ConstructComponent(MergerTool.main.getData(ID, gameObject.GetComponent<MeshFilter>().sharedMesh, out prefabIndex, out meshRegistry));
 
         //Load the new material here
-        if (null != customMaterial) { GetComponent<Renderer>().material = customMaterial; }
+        if (null != customMaterial) { myMaterial = customMaterial; }
         MergeMesh();
     }
 
     public void ConstructComponent(DataPacket packet)
     {
-        for (int i = 0; i < packet.prefabs.Length; i++)
-        {
-            if (packet.prefabs[i].prefab.GetComponent<MeshFilter>().sharedMesh == gameObject.GetComponent<MeshFilter>().sharedMesh)
-            {
-                prefabIndex = i;
-                maximumDistanceToRoot = packet.prefabs[i].maximumDistanceToRoot;
-                isStatic = packet.prefabs[i].isStatic;
-                if(isStatic) { gameObject.isStatic = this.isStatic; }
-            }
-        }
+        if(null == packet) { MergerTool.packetObserver += HandleNewPacket; return; }
+
+        maximumDistanceToRoot = packet.prefabs[prefabIndex].maximumDistanceToRoot;
+        isStatic = packet.prefabs[prefabIndex].isStatic;
+        if (isStatic) { gameObject.isStatic = this.isStatic; }
         customMaterial = packet.mergedMaterial;
         UpdateUVs();
     }

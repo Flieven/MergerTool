@@ -112,12 +112,17 @@ public class MeshRegistry : MonoBehaviour
     {
 
         GameObject nearestFound = null;
-        List<Node> proximityNodes = posDictionary[ID][prefabIndex].AllNodesInProximity(posDictionary[ID][prefabIndex].getRoot, obj.transform.position, 0, fastSearch, maxDistance);
+        Node nearestNode = null;
+        List<Node> proximityNodes = posDictionary[ID][prefabIndex].AllNodesInProximity(posDictionary[ID][prefabIndex].getRoot, obj.transform.position, 0, false, maxDistance);
         foreach(Node node in proximityNodes)
         {
             for (int i = 0; i < node.subGroups.Count; i++)
             {
-                if(node.subGroups[i].subGroupParent.transform.Find(obj.name)) { nearestFound = node.subGroups[i].subGroupParent; }
+                if(node.subGroups[i].subGroupParent.transform.Find(obj.name)) 
+                { 
+                    nearestFound = node.subGroups[i].subGroupParent;
+                    nearestNode = node;
+                }
             }
             //if(node.parentObj.transform.Find(obj.name)) { nearestFound = node; }
         }
@@ -137,13 +142,19 @@ public class MeshRegistry : MonoBehaviour
         nearestFound.transform.GetComponent<MeshFilter>().mesh.Clear();
         nearestFound.transform.GetComponent<MeshFilter>().mesh = null;
 
-        if(nearestFound.transform.parent.childCount > 0)
+        if(nearestFound.transform.childCount > 0)
         {
             Transform childTransform = nearestFound.transform.GetChild(0);
 
             CombineMeshes(childTransform.gameObject,
                           childTransform.GetComponent<MergerTool_Component>().IsStatic,
                           childTransform.GetComponent<MergerTool_Component>().CustomMaterial);
+        }
+        else
+        {
+            Debug.Log("Less than or equal to 0 children found in node '" +nearestNode.parentObj.name+"'");
+            posDictionary[ID][prefabIndex].RemoveSubGroup(nearestNode, nearestFound);
+            Destroy(nearestFound);
         }
         //nearestFound.parentObj.transform.GetChild(0).GetComponent<MergerTool_Component>().CombineMeshes();
 
