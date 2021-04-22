@@ -700,6 +700,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fastTreeSearch: 1
+  maxNumWorkableQueueObjects: 10
   dataPackets:
   - ID: FirstSet
     textureSize: {x: 0, y: 0}
@@ -732,6 +733,7 @@ MonoBehaviour:
       detailMask:
         array: []
     mergedMaterial: {fileID: 0}
+    meshRegistry: {fileID: 0}
   - ID: SecondSet
     textureSize: {x: 0, y: 0}
     prefabs:
@@ -756,6 +758,7 @@ MonoBehaviour:
       detailMask:
         array: []
     mergedMaterial: {fileID: 0}
+    meshRegistry: {fileID: 0}
 --- !u!114 &1737349590
 MonoBehaviour:
   m_ObjectHideFlags: 0

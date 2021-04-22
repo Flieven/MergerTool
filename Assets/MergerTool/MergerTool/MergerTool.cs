@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Threading;
 
 [System.Serializable]
 public struct PrefabStruct
@@ -31,6 +32,7 @@ public class DataPacket
     [SerializeField] public PrefabStruct[] prefabs;
     [SerializeField] public Texture2DStruct textureRegistry;
     [ReadOnly] [SerializeField] public Material mergedMaterial;
+    [ReadOnly] public MeshRegistry meshRegistry;
 
     public DataPacket(string ID, PrefabStruct[] prefabs)
     {
@@ -46,7 +48,7 @@ public class MergerTool : MonoBehaviour
 {
     [Tooltip("Optimize Mesh Merge Root search for speed, less accurate.")]
     [SerializeField] private bool fastTreeSearch = true;
-
+    [SerializeField] private int maxNumWorkableQueueObjects = 10;
     [SerializeField] private List<DataPacket> dataPackets;
     /*[SerializeField]*/
     private MaterialMaker matMaker = null;
@@ -56,6 +58,11 @@ public class MergerTool : MonoBehaviour
     public static MergerTool main;
 
     public static event Action<string> packetObserver;
+
+    private Queue<DataPacketThreadInfo<DataPacket>> dataPacketThreadInfoQueue = new Queue<DataPacketThreadInfo<DataPacket>>();
+
+    private int numQueueObjectsToWork = 0;
+    private bool workingQueue = false;
 
     private void Awake()
     {
@@ -79,6 +86,7 @@ public class MergerTool : MonoBehaviour
         }
 
         AddComponentToPrefabs(false);
+        StartCoroutine(ProcessQueue());
     }
 
     private void OnDestroy()
@@ -113,6 +121,7 @@ public class MergerTool : MonoBehaviour
 
     private void PopulateDataSet(int index)
     {
+        dataPackets[index].meshRegistry = this.meshRegistry;
         for (int i = 0; i < dataPackets[index].prefabs.Length; i++)
         { dataPackets[index].prefabs[i].InitializeMesh(); }
 
@@ -125,25 +134,80 @@ public class MergerTool : MonoBehaviour
         else { Debug.Log("packetObserver was null, no items subscribed."); }
     }
 
-    public DataPacket getData(string ID, Mesh mesh, out int meshIndex, out MeshRegistry meshRegistry)
+    public void RequestDataSet(Action<DataPacket> callback, string ID)
     {
-        meshRegistry = this.meshRegistry;
-        int foundMeshIndex = 0;
+        ThreadStart threadStart = delegate { DataSetThread(callback, ID); };
 
+        new Thread(threadStart).Start();
+    }
+
+    private void DataSetThread(Action<DataPacket> callback, string ID)
+    {
+        DataPacket packet = getData(ID);
+        lock (dataPacketThreadInfoQueue) {
+        dataPacketThreadInfoQueue.Enqueue(new DataPacketThreadInfo<DataPacket>(callback, packet));
+        }
+    }
+
+    private void Update()
+    {
+        //if (dataPacketThreadInfoQueue.Count > 0 && !workingQueue)
+        //{
+        //    workingQueue = true;
+
+        //    if(dataPacketThreadInfoQueue.Count > 10)
+        //    { numQueueObjectsToWork = 10; }
+        //    else if (dataPacketThreadInfoQueue.Count < 10)
+        //    { numQueueObjectsToWork = dataPacketThreadInfoQueue.Count; }
+
+        //    for (int i = 0; i < numQueueObjectsToWork; i++)
+        //    {
+        //        DataPacketThreadInfo<DataPacket> threadInfo = dataPacketThreadInfoQueue.Dequeue();
+        //        threadInfo.callback(threadInfo.parameter);
+
+        //        if(i <= numQueueObjectsToWork) { workingQueue = false; }
+        //    }
+        //}
+    }
+
+    IEnumerator ProcessQueue()
+    {
+        while (true)
+        {
+            while(dataPacketThreadInfoQueue.Count > 0)
+            {
+                if(!workingQueue)
+                {
+                    workingQueue = true;
+                    if (dataPacketThreadInfoQueue.Count > 10)
+                    { numQueueObjectsToWork = 10; }
+                    else if (dataPacketThreadInfoQueue.Count < 10)
+                    { numQueueObjectsToWork = dataPacketThreadInfoQueue.Count; }
+                }
+
+                for (int i = 0; i < numQueueObjectsToWork; i++)
+                {
+                    DataPacketThreadInfo<DataPacket> threadInfo = dataPacketThreadInfoQueue.Dequeue();
+                    threadInfo.callback(threadInfo.parameter);
+
+                    if (i <= numQueueObjectsToWork) { workingQueue = false; }
+                }
+                yield return null;
+            }
+            yield return null;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+    }
+
+    public DataPacket getData(string ID)
+    {
         for (int i = 0; i < dataPackets.Count; i++)
         {
             if (dataPackets[i].ID == ID) 
             {
-                for(int ii = 0; ii < dataPackets[i].prefabs.Length; ii++)
-                { 
-                    if(dataPackets[i].prefabs[ii].prefabMesh == mesh)
-                    {
-                        foundMeshIndex = ii;
-                        break;
-                    }
-                }
-
-                meshIndex = foundMeshIndex;
                 return dataPackets[i];
             }
         }
@@ -201,4 +265,16 @@ public class MergerTool : MonoBehaviour
     public void Clear_DataPackets() { dataPackets.Clear(); }
 
     #endregion
+
+    struct DataPacketThreadInfo<T>
+    {
+        public readonly Action<T> callback;
+        public readonly T parameter;
+
+        public DataPacketThreadInfo(Action<T> callback, T parameter)
+        {
+            this.callback = callback;
+            this.parameter = parameter;
+        }
+    }
 }

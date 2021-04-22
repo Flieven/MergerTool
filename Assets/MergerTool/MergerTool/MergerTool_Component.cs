@@ -1,15 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Unity.Jobs;
 using UnityEngine;
-
-public struct InitializationJob : IJob
-{
-    public void Execute()
-    {
-
-    }
-}
 
 [AddComponentMenu("MergerTool/MergerTool Component")]
 public class MergerTool_Component : MonoBehaviour
@@ -28,18 +19,27 @@ public class MergerTool_Component : MonoBehaviour
 
     private Mesh myMesh = null;
     private Material myMaterial = null;
+    private MeshFilter myMeshFilter = null;
+
+    private Vector2[] uvs;
+    private int uvLength;
 
     private void Awake()
     {
-        myMesh = gameObject.GetComponent<MeshFilter>().sharedMesh;
         myMaterial = GetComponent<Renderer>().material;
+        myMeshFilter = GetComponent<MeshFilter>();
+        myMesh = myMeshFilter.sharedMesh;
+        uvs = myMesh.uv;
+        uvLength = myMesh.uv.Length;
     }
 
     private void Start()
     {
         InitializeComponent();
 
-        //ConstructComponent(MergerTool.main.getData(ID, this));
+        //ConstructComponent(MergerTool.main.getData(ID));
+        // if (null != customMaterial) { myMaterial = customMaterial; }
+        // MergeMesh();
 
         ////Load the new material here
         //if (null != customMaterial) { GetComponent<Renderer>().material = customMaterial; }
@@ -54,7 +54,7 @@ public class MergerTool_Component : MonoBehaviour
     private void InitializeComponent()
     {
         if (MergerTool.main.hasData(ID))
-        { ApplyDataPacket(); }
+        { MergerTool.main.RequestDataSet(OnDataPackReceived, ID); }
         else
         {
             //Debug.Log("No data packet for ID '" + ID + "' observing if that changes!");
@@ -65,18 +65,18 @@ public class MergerTool_Component : MonoBehaviour
     private void HandleNewPacket(string ID)
     {
         if(ID == this.ID)
-        { 
+        {
             //Debug.Log("Observer for ID '" + ID + "' in object '" + gameObject.name + "' triggered!");
-            ApplyDataPacket();
+            MergerTool.main.RequestDataSet(OnDataPackReceived, ID);
+            //ConstructComponent(MergerTool.main.getData(ID));
             MergerTool.packetObserver -= HandleNewPacket;
         }
     }
 
-    private void ApplyDataPacket()
+    private void OnDataPackReceived(DataPacket packet)
     {
-        ConstructComponent(MergerTool.main.getData(ID, gameObject.GetComponent<MeshFilter>().sharedMesh, out prefabIndex, out meshRegistry));
-
-        //Load the new material here
+        Debug.Log(gameObject.name + " received data packet: " + packet.ID);
+        ConstructComponent(packet);
         if (null != customMaterial) { myMaterial = customMaterial; }
         MergeMesh();
     }
@@ -85,11 +85,19 @@ public class MergerTool_Component : MonoBehaviour
     {
         if(null == packet) { MergerTool.packetObserver += HandleNewPacket; return; }
 
+        for (int i = 0; i < packet.prefabs.Length; i++)
+        {
+            if(packet.prefabs[i].prefabMesh == myMesh)
+            { prefabIndex = i; }
+        }
+
         maximumDistanceToRoot = packet.prefabs[prefabIndex].maximumDistanceToRoot;
         isStatic = packet.prefabs[prefabIndex].isStatic;
         if (isStatic) { gameObject.isStatic = this.isStatic; }
         customMaterial = packet.mergedMaterial;
-        UpdateUVs();
+        meshRegistry = packet.meshRegistry;
+
+        StartCoroutine(UpdateUVs());
     }
 
     public void DestroyComponent()
@@ -97,18 +105,17 @@ public class MergerTool_Component : MonoBehaviour
         DestroyImmediate(this, true);
     }
 
-    void UpdateUVs()
+    IEnumerator UpdateUVs()
     {
         uvList = new List<Vector3>();
 
-        MeshFilter meshFilterComp = GetComponent<MeshFilter>();
-
-        for (int i = 0; i < meshFilterComp.sharedMesh.uv.Length; i++)
+        for (int i = 0; i < uvLength; i++)
         {
-            uvList.Add(new Vector3(meshFilterComp.sharedMesh.uv[i].x,
-                                   meshFilterComp.sharedMesh.uv[i].y, prefabIndex));
+            uvList.Add(new Vector3(uvs[i].x,
+                                   uvs[i].y, prefabIndex));
         }
-        meshFilterComp.mesh.SetUVs(0, uvList);
+        myMeshFilter.mesh.SetUVs(0, uvList);
+        yield return null;
     }
 
     //public void CombineMeshes()
