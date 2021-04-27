@@ -179,9 +179,9 @@ public class MergerTool : MonoBehaviour
                 if(!workingQueue)
                 {
                     workingQueue = true;
-                    if (dataPacketThreadInfoQueue.Count > 10)
-                    { numQueueObjectsToWork = 10; }
-                    else if (dataPacketThreadInfoQueue.Count < 10)
+                    if (dataPacketThreadInfoQueue.Count > maxNumWorkableQueueObjects)
+                    { numQueueObjectsToWork = maxNumWorkableQueueObjects; }
+                    else if (dataPacketThreadInfoQueue.Count < maxNumWorkableQueueObjects)
                     { numQueueObjectsToWork = dataPacketThreadInfoQueue.Count; }
                 }
 
