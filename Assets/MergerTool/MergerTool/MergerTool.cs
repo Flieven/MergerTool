@@ -192,7 +192,7 @@ public class MergerTool : MonoBehaviour
 
                     if (i <= numQueueObjectsToWork) { workingQueue = false; }
                 }
-                yield return null;
+                yield return new WaitForEndOfFrame();
             }
             yield return null;
         }

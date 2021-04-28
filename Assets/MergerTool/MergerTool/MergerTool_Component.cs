@@ -31,6 +31,7 @@ public class MergerTool_Component : MonoBehaviour
         myMesh = myMeshFilter.sharedMesh;
         uvs = myMesh.uv;
         uvLength = myMesh.uv.Length;
+        transform.GetComponent<MeshRenderer>().enabled = false;
     }
 
     private void Start()
